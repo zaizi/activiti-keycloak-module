@@ -1,4 +1,4 @@
-package com.activiti.extension.bean.activiti.extension.keycloak.configuration;
+package com.activiti.extension.bean;
 /**
  * Configures KeyCloak with the activiti process engine
  *
@@ -6,8 +6,6 @@ package com.activiti.extension.bean.activiti.extension.keycloak.configuration;
  */
 
 
-import com.activiti.extension.bean.CustomBean;
-import com.activiti.extension.bean.KeyCloakPropertyLoader;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.ProcessEngineConfiguration;
 import org.activiti.engine.RuntimeService;
@@ -35,7 +33,6 @@ import java.util.Arrays;
 import java.util.List;
 
 @Configuration
-@ComponentScan({"com.activiti.extension.bean"})
 public class KeyCloakConfiguration  extends AbstractProcessEngineConfigurator {
 
 
