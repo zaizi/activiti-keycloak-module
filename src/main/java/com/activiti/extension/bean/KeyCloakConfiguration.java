@@ -5,76 +5,63 @@ package com.activiti.extension.bean;
  * @author Vijaya Alla
  */
 
-
-import org.activiti.engine.IdentityService;
-import org.activiti.engine.ProcessEngineConfiguration;
-import org.activiti.engine.RuntimeService;
 import org.activiti.engine.cfg.AbstractProcessEngineConfigurator;
-import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
-import org.activiti.engine.impl.cfg.StandaloneProcessEngineConfiguration;
-import org.activiti.engine.impl.interceptor.SessionFactory;
-import org.activiti.spring.SpringProcessEngineConfiguration;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.activiti.engine.impl.IdentityServiceImpl;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
-import org.keycloak.admin.client.resource.RealmsResource;
-import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.keycloak.representations.idm.UserSessionRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Configuration
-public class KeyCloakConfiguration  extends AbstractProcessEngineConfigurator {
+public class KeyCloakConfiguration extends AbstractProcessEngineConfigurator {
 
+	@Autowired
+	private CustomBean customBean;
+	
+	@Autowired
+	private IdentityServiceImpl identityServiceImpl;
 
+	@Bean
+	public Keycloak getKeyCloakClient() {
 
-    @Autowired
-    private CustomBean customBean;
+		/*
+		 * Keycloak.getInstance(customBean.getPropertyValue(
+		 * "keycloak.auth-server-url"),
+		 * customBean.getPropertyValue("keycloak.realm"),
+		 * customBean.getPropertyValue("keycloak.realm"),
+		 * customBean.getPropertyValue("keycloak.password"),
+		 * customBean.getPropertyValue("keycloak.clientId"));
+		 */
 
+		Keycloak keycloak = KeycloakBuilder.builder().serverUrl(customBean.getPropertyValue("keycloak.auth-server-url"))
+				.realm(customBean.getPropertyValue("keycloak.realm"))
+				.username(customBean.getPropertyValue("keycloak.userName"))
+				.password(customBean.getPropertyValue("keycloak.password"))
+				.clientId(customBean.getPropertyValue("keycloak.clientId")).grantType(OAuth2Constants.PASSWORD)
+				.clientSecret(customBean.getPropertyValue("keycloak.client.secret")).build();
 
-     @Bean
-    public Keycloak getKeyCloakClient() {
+		RealmResource rm = keycloak.realm(customBean.getPropertyValue("keycloak.realm"));
 
-        /*Keycloak.getInstance(customBean.getPropertyValue("keycloak.auth-server-url"),
-                                                customBean.getPropertyValue("keycloak.realm"),
-                                                customBean.getPropertyValue("keycloak.realm"),
-                                                customBean.getPropertyValue("keycloak.password"),
-                                                customBean.getPropertyValue("keycloak.clientId"));*/
+		UsersResource ur = rm.users();
 
-        Keycloak keycloak = KeycloakBuilder.builder().serverUrl(customBean.getPropertyValue("keycloak.auth-server-url"))
-                .realm(customBean.getPropertyValue("keycloak.realm"))
-                .username(customBean.getPropertyValue("keycloak.userName"))
-                .password(customBean.getPropertyValue("keycloak.password"))
-                .clientId(customBean.getPropertyValue("keycloak.clientId"))
-                .grantType(OAuth2Constants.PASSWORD)
-                .clientSecret(customBean.getPropertyValue("keycloak.client.secret"))
-                .build();
+		List<UserRepresentation> urR = ur.list();
+		urR.forEach(urreprestn -> {
+			System.out.println(String.format("Last Name %s", urreprestn.getLastName()));
+		});
 
+		return keycloak;
 
-        RealmResource rm = keycloak.realm(customBean.getPropertyValue("keycloak.realm"));
+	}
 
-        UsersResource ur = rm.users();
-
-        List<UserRepresentation> urR = ur.list();
-        urR.forEach(urreprestn -> {
-            System.out.println(String.format("Last Name %s", urreprestn.getLastName()));
-        });
-        return keycloak;
-
-    }
-
-    public RealmResource getRealm() {
-        return  getKeyCloakClient().realm(customBean.getPropertyValue("keycloak.realm"));
-    }
-
+	public RealmResource getRealm() {
+		return getKeyCloakClient().realm(customBean.getPropertyValue("keycloak.realm"));
+	}
 
 }
