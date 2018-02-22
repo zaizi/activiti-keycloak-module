@@ -81,7 +81,7 @@ public class KeyCloakUserGroupDetails {
         List<ExternalIdmUserImpl> users = Collections.emptyList();
 
         if(userRepresentations != null && !userRepresentations.isEmpty()) {
-            users = userRepresentations.stream().map(user -> {
+            users = userRepresentations.stream().filter(user -> user.isEnabled()).map(user -> {
                 ExternalIdmUserImpl externalIdmUser = new ExternalIdmUserImpl();
                 externalIdmUser.setId(user.getUsername());
                 externalIdmUser.setOriginalSrcId(user.getUsername());

@@ -16,13 +16,23 @@ public class KeyCloakConfiguration extends AbstractProcessEngineConfigurator {
     @Autowired
     private Environment environment;
 
+    @Autowired
+    private KeyCloakEnabled keyCloakEnabled;
+
 
     /**
      * Creates the Key Cloak Client with the credentials provider
      * @return {@code org.keycloak.admin.client.Keycloak}
      */
     @Bean
+
     public Keycloak getKeyCloakClient() {
+
+
+        if(!this.keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
+
+            return null;
+        }
 
         return KeycloakBuilder.builder().serverUrl(environment.getProperty("keycloak.auth-server-url"))
                 .realm(environment.getProperty("keycloak.realm"))
@@ -39,6 +49,12 @@ public class KeyCloakConfiguration extends AbstractProcessEngineConfigurator {
      */
     @Bean
     public KeyCloakUserGroupDetails getKeyCloakUserGroupDetails() {
+
+
+        if(!this.keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
+
+            return null;
+        }
 
         return new KeyCloakUserGroupDetails(getKeyCloakClient(), environment.getProperty("keycloak.client.realm"));
     }

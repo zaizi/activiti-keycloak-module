@@ -10,8 +10,14 @@ public class ActivityBootstrapConfigurer implements BootstrapConfigurer {
     @Autowired
     private FileSyncService fileSyncService;
 
+
+    @Autowired
+    private KeyCloakEnabled keyCloakEnabled;
+
     public void applicationContextInitialized(org.springframework.context.ApplicationContext applicationContext) {
 
-        fileSyncService.asyncExecuteFullSynchronizationIfNeeded(null);
+        if(!this.keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
+            fileSyncService.asyncExecuteFullSynchronizationIfNeeded(null);
+        }
     }
 }

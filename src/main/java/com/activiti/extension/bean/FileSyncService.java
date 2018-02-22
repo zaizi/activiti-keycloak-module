@@ -21,6 +21,9 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
     @Autowired
     private Environment environment;
 
+    @Autowired
+    private KeyCloakEnabled keyCloakEnabled;
+
     @Override
     protected String getIdmType() {
         return "keycloak";
@@ -70,11 +73,23 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 
     @Override
     protected String getScheduledFullSyncCronExpression() {
+
+        if(!this.keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
+
+            return null;
+        }
+
         return environment.getProperty("keycloak.synchronization.full.cronExpression");
     }
 
     @Override
     protected String getScheduledDifferentialSyncCronExpression() {
+
+        if(!this.keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
+
+            return null;
+        }
+
         return environment.getProperty("keycloak.synchronization.differential.cronExpression");
     }
 

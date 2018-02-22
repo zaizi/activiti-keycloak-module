@@ -67,11 +67,12 @@ public class KeyCloakUserGroupDetailsTest {
      * @param lstOfUsers - List of Users
      * @param name - User Name
      */
-    private void addUserRepresentation(List<UserRepresentation> lstOfUsers, String name) {
+    private void addUserRepresentation(List<UserRepresentation> lstOfUsers, String name, boolean isEnabled) {
 
         UserRepresentation userRepresentation = new UserRepresentation();
         userRepresentation.setId(name);
         userRepresentation.setUsername(name);
+        userRepresentation.setEnabled(isEnabled);
         lstOfUsers.add(userRepresentation);
     }
 
@@ -122,8 +123,8 @@ public class KeyCloakUserGroupDetailsTest {
     public void getKeyCloakUsers() {
 
         List<UserRepresentation> lstOfUsers = new ArrayList<>();
-        addUserRepresentation(lstOfUsers, "SuperUser");
-        addUserRepresentation(lstOfUsers, "tempUser");
+        addUserRepresentation(lstOfUsers, "SuperUser", true);
+        addUserRepresentation(lstOfUsers, "tempUser", false);
 
         when(realmsResource.users()).thenReturn(usersResource);
 
@@ -131,7 +132,7 @@ public class KeyCloakUserGroupDetailsTest {
 
         List<ExternalIdmUserImpl> users = keyCloakUserGroupDetails.getUsers();
 
-        assertEquals(2, users.size());
+        assertEquals(1, users.size());
 
     }
 
@@ -256,8 +257,8 @@ public class KeyCloakUserGroupDetailsTest {
         addExternalUserIdm(lstOfUsers, "tempUser");
 
         List<UserRepresentation> lstOfUsersRepresentation = new ArrayList<>();
-        addUserRepresentation(lstOfUsersRepresentation, "SuperUser");
-        addUserRepresentation(lstOfUsersRepresentation, "tempUser");
+        addUserRepresentation(lstOfUsersRepresentation, "SuperUser", true);
+        addUserRepresentation(lstOfUsersRepresentation, "tempUser", true);
 
 
         List<GroupRepresentation> lstOfGroups = new ArrayList<>();
@@ -297,8 +298,8 @@ public class KeyCloakUserGroupDetailsTest {
         addExternalUserIdm(lstOfUsers, "tempUser");
 
         List<UserRepresentation> lstOfUsersRepresentation = new ArrayList<>();
-        addUserRepresentation(lstOfUsersRepresentation, "SuperUser");
-        addUserRepresentation(lstOfUsersRepresentation, "tempUser");
+        addUserRepresentation(lstOfUsersRepresentation, "SuperUser", true);
+        addUserRepresentation(lstOfUsersRepresentation, "tempUser", false);
 
 
         List<GroupRepresentation> lstOfGroups = new ArrayList<>();
