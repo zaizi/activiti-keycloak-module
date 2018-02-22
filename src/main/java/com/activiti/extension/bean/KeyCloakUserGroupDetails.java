@@ -12,10 +12,7 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -37,7 +34,7 @@ public class KeyCloakUserGroupDetails {
 
 
 
-        RealmResource realmsResource = keyCloakClient.realm(customBean.getPropertyValue("keycloak.realm"));
+        RealmResource realmsResource = keyCloakClient.realm(customBean.getPropertyValue("keycloak.client.realm"));
         GroupsResource groupsResource = realmsResource.groups();
 
         List<ExternalIdmGroupImpl> lstOfGroups = Collections.emptyList();
@@ -75,7 +72,7 @@ public class KeyCloakUserGroupDetails {
 
     public List<ExternalIdmUserImpl> getUsers() {
 
-        RealmResource realmsResource = keyCloakClient.realm(customBean.getPropertyValue("keycloak.realm"));
+        RealmResource realmsResource = keyCloakClient.realm(customBean.getPropertyValue("keycloak.client.realm"));
         UsersResource ur = realmsResource.users();
 
 
