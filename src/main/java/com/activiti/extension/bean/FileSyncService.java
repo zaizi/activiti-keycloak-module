@@ -3,6 +3,7 @@ package com.activiti.extension.bean;
 import com.activiti.api.idm.AbstractExternalIdmSourceSyncService;
 import com.activiti.domain.sync.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -18,7 +19,7 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
     private KeyCloakUserGroupDetails keyCloakUserGropuDetails;
 
     @Autowired
-    private CustomBean customBean;
+    private Environment environment;
 
     @Override
     protected String getIdmType() {
@@ -69,12 +70,12 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 
     @Override
     protected String getScheduledFullSyncCronExpression() {
-        return customBean.getPropertyValue("keycloak.synchronization.full.cronExpression");
+        return environment.getProperty("keycloak.synchronization.full.cronExpression");
     }
 
     @Override
     protected String getScheduledDifferentialSyncCronExpression() {
-        return customBean.getPropertyValue("keycloak.synchronization.differential.cronExpression");
+        return environment.getProperty("keycloak.synchronization.differential.cronExpression");
     }
 
     @Override

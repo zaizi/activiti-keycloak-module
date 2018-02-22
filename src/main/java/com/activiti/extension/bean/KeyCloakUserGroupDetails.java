@@ -20,13 +20,13 @@ public class KeyCloakUserGroupDetails {
 
     private Keycloak keyCloakClient;
 
-    private CustomBean customBean;
+    private String realmName;
 
 
-    public KeyCloakUserGroupDetails(final Keycloak client, CustomBean bean) {
+    public KeyCloakUserGroupDetails(final Keycloak client, String realmName) {
 
         this.keyCloakClient = client;
-        this.customBean = bean;
+        this.realmName = realmName;
     }
 
     public List<ExternalIdmGroupImpl> getGroups(List<ExternalIdmUserImpl> users) {
@@ -34,7 +34,7 @@ public class KeyCloakUserGroupDetails {
 
 
 
-        RealmResource realmsResource = keyCloakClient.realm(customBean.getPropertyValue("keycloak.client.realm"));
+        RealmResource realmsResource = keyCloakClient.realm(this.realmName);
         GroupsResource groupsResource = realmsResource.groups();
 
         List<ExternalIdmGroupImpl> lstOfGroups = Collections.emptyList();
@@ -72,7 +72,7 @@ public class KeyCloakUserGroupDetails {
 
     public List<ExternalIdmUserImpl> getUsers() {
 
-        RealmResource realmsResource = keyCloakClient.realm(customBean.getPropertyValue("keycloak.client.realm"));
+        RealmResource realmsResource = keyCloakClient.realm(this.realmName);
         UsersResource ur = realmsResource.users();
 
 

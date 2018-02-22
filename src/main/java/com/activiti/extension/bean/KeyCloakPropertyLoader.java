@@ -1,9 +1,4 @@
 package com.activiti.extension.bean;
-/**
- * Class is used to Load the Keycloak properties placed in class path
- *
- * @author Vijaya Alla
- */
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
