@@ -42,6 +42,11 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
     @Override
     protected ExternalIdmQueryResult getAllUsersAndGroupsWithResolvedMembers(Long aLong) {
 
+        if(!this.keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
+
+            return null;
+        }
+
 
         List<ExternalIdmUserImpl>  lstOfUsers = keyCloakUserGropuDetails.getUsers();
 
