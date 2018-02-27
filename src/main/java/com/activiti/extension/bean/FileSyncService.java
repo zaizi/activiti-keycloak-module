@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -44,7 +45,7 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 
         if(!this.keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
 
-            return null;
+            return new ExternalIdmQueryResultImpl(Collections.emptyList(), Collections.emptyList());
         }
 
 
