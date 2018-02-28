@@ -1,4 +1,4 @@
-package com.activiti.extension.bean;
+package com.zaizi.authentication;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;

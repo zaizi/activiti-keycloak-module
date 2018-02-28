@@ -48,6 +48,7 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
             return new ExternalIdmQueryResultImpl(Collections.emptyList(), Collections.emptyList());
         }
 
+        keyCloakUserGropuDetails.setRealmName(environment.getProperty("keycloak.client.realm"));
 
         List<ExternalIdmUserImpl>  lstOfUsers = keyCloakUserGropuDetails.getUsers();
 

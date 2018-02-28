@@ -1,5 +1,7 @@
-package com.activiti.extension.bean;
+package com.activiti.extension.config;
 
+import com.activiti.extension.bean.KeyCloakEnabled;
+import com.activiti.extension.bean.KeyCloakUserGroupDetails;
 import org.activiti.engine.cfg.AbstractProcessEngineConfigurator;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
@@ -25,7 +27,6 @@ public class KeyCloakConfiguration extends AbstractProcessEngineConfigurator {
      * @return {@code org.keycloak.admin.client.Keycloak}
      */
     @Bean
-
     public Keycloak getKeyCloakClient() {
 
 
@@ -41,22 +42,4 @@ public class KeyCloakConfiguration extends AbstractProcessEngineConfigurator {
                 .clientId(environment.getProperty("keycloak.clientId")).grantType(OAuth2Constants.PASSWORD)
                 .clientSecret(environment.getProperty("keycloak.client.secret")).build();
     }
-
-
-    /**
-     * Creates a Service bean to fetch Users and Groups from Key Cloak
-     * @return {@code com.activiti.extension.bean.KeyCloakUserGroupDetails}
-     */
-    @Bean
-    public KeyCloakUserGroupDetails getKeyCloakUserGroupDetails() {
-
-
-        if(!this.keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
-
-            return null;
-        }
-
-        return new KeyCloakUserGroupDetails(getKeyCloakClient(), environment.getProperty("keycloak.client.realm"));
-    }
-
 }

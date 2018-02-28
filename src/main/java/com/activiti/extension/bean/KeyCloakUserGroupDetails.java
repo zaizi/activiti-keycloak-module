@@ -11,22 +11,28 @@ import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+
+@Component
+@ComponentScan("com.activiti.extension.config")
 public class KeyCloakUserGroupDetails {
 
+
+    @Autowired
     private Keycloak keyCloakClient;
 
     private String realmName;
 
 
-    public KeyCloakUserGroupDetails(final Keycloak client, String realmName) {
+    public KeyCloakUserGroupDetails() {
 
-        this.keyCloakClient = client;
-        this.realmName = realmName;
     }
 
     public List<ExternalIdmGroupImpl> getGroups(List<ExternalIdmUserImpl> users) {
@@ -105,6 +111,7 @@ public class KeyCloakUserGroupDetails {
 
     }
 
-
-
+    public void setRealmName(String realmName) {
+        this.realmName = realmName;
+    }
 }

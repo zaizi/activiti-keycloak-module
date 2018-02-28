@@ -1,9 +1,10 @@
-package com.activiti.extension.bean.service;
+package com.zaizi.authentication;
 
 
-import com.activiti.extension.bean.CustomizeDaoAuthenticationProvider;
-import com.activiti.extension.bean.KeyCloakAuthenticationProvider;
+;
 import com.activiti.extension.bean.KeyCloakEnabled;
+import com.zaizi.authentication.CustomizeDaoAuthenticationProvider;
+import com.zaizi.authentication.KeyCloakAuthenticationProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

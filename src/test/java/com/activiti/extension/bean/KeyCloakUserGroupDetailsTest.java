@@ -1,8 +1,7 @@
-package com.activiti.extension.bean.service;
+package com.activiti.extension.bean;
 
 import com.activiti.domain.sync.ExternalIdmGroupImpl;
 import com.activiti.domain.sync.ExternalIdmUserImpl;
-import com.activiti.extension.bean.KeyCloakUserGroupDetails;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +15,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
@@ -34,9 +34,7 @@ public class KeyCloakUserGroupDetailsTest {
     private KeyCloakUserGroupDetails keyCloakUserGroupDetails;
 
     @Mock
-    private Keycloak keycloak;
-
-
+    private Keycloak keyCloakClient;
 
     @Mock
     private RealmResource realmsResource;
@@ -56,9 +54,9 @@ public class KeyCloakUserGroupDetailsTest {
      * Initiate the mock objects as required by test case
      */
     private void mock() {
-        when(keycloak.realm(Mockito.anyString())).thenReturn(realmsResource);
+        when(keyCloakClient.realm(Mockito.anyString())).thenReturn(realmsResource);
         when(realmsResource.groups()).thenReturn(groupsResource);
-        keyCloakUserGroupDetails = new KeyCloakUserGroupDetails(keycloak, "test");
+        keyCloakUserGroupDetails.setRealmName("test");
     }
 
 

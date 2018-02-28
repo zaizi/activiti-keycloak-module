@@ -1,4 +1,4 @@
-package com.activiti.extension.bean;
+package com.activiti.extension.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

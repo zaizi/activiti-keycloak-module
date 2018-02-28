@@ -1,5 +1,6 @@
-package com.activiti.extension.bean;
+package com.zaizi.authentication;
 
+import com.activiti.extension.bean.KeyCloakEnabled;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -23,6 +24,8 @@ public class KeyCloakAuthenticationProvider extends AbstractUserDetailsAuthentic
     private CustomizeDaoAuthenticationProvider customizeDaoAuthenticationProvider;
 
     private KeyCloakEnabled keyCloakEnabled;
+
+
 
 
     /**

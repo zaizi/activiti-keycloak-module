@@ -1,14 +1,18 @@
-package com.activiti.extension.bean;
+package com.activiti.extension.config;
 
 import com.activiti.api.security.AlfrescoSecurityConfigOverride;
+import com.activiti.extension.bean.KeyCloakEnabled;
+import com.zaizi.authentication.CustomizeDaoAuthenticationProvider;
+import com.zaizi.authentication.KeyCloakAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.stereotype.Component;
 
-@Component
+@Configuration
 public class ActivitiSecurityOverride  implements AlfrescoSecurityConfigOverride {
 
     @Autowired
