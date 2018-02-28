@@ -1,10 +1,14 @@
-package com.activiti.extension.bean;
+package com.activiti.extension.config;
 
 import com.activiti.api.boot.BootstrapConfigurer;
+import com.activiti.extension.bean.FileSyncService;
+import com.activiti.extension.bean.KeyCloakEnabled;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
-@Component
+@Configuration
 public class ActivityBootstrapConfigurer implements BootstrapConfigurer {
 
     @Autowired
