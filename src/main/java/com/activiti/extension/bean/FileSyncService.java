@@ -10,98 +10,93 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-
 @Component
 public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 
+	@Autowired
+	private KeyCloakUserGroupDetails keyCloakUserGropuDetails;
 
+	@Autowired
+	private Environment environment;
 
-    @Autowired
-    private KeyCloakUserGroupDetails keyCloakUserGropuDetails;
+	@Autowired
+	private KeyCloakEnabled keyCloakEnabled;
 
-    @Autowired
-    private Environment environment;
+	@Override
+	protected String getIdmType() {
+		return "keycloak";
+	}
 
-    @Autowired
-    private KeyCloakEnabled keyCloakEnabled;
+	@Override
+	protected boolean isFullSyncEnabled(Long aLong) {
+		return true;
+	}
 
-    @Override
-    protected String getIdmType() {
-        return "keycloak";
-    }
+	@Override
+	protected boolean isDifferentialSyncEnabled(Long aLong) {
+		return true;
+	}
 
-    @Override
-    protected boolean isFullSyncEnabled(Long aLong) {
-        return true;
-    }
+	@Override
+	protected ExternalIdmQueryResult getAllUsersAndGroupsWithResolvedMembers(Long aLong) {
 
-    @Override
-    protected boolean isDifferentialSyncEnabled(Long aLong) {
-        return true;
-    }
+		if (!this.keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
 
-    @Override
-    protected ExternalIdmQueryResult getAllUsersAndGroupsWithResolvedMembers(Long aLong) {
+			return new ExternalIdmQueryResultImpl(Collections.emptyList(), Collections.emptyList());
+		}
 
-        if(!this.keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
+		keyCloakUserGropuDetails.setRealmName(environment.getProperty("keycloak.client.realm"));
 
-            return new ExternalIdmQueryResultImpl(Collections.emptyList(), Collections.emptyList());
-        }
+		List<ExternalIdmUserImpl> lstOfUsers = keyCloakUserGropuDetails.getUsers();
 
-        keyCloakUserGropuDetails.setRealmName(environment.getProperty("keycloak.client.realm"));
+		return new ExternalIdmQueryResultImpl(lstOfUsers, keyCloakUserGropuDetails.getGroups(lstOfUsers));
 
-        List<ExternalIdmUserImpl>  lstOfUsers = keyCloakUserGropuDetails.getUsers();
+	}
 
+	@Override
+	protected List<? extends ExternalIdmUser> getUsersModifiedSince(Date date, Long aLong) {
+		return null;
+	}
 
-        return new ExternalIdmQueryResultImpl(lstOfUsers, keyCloakUserGropuDetails.getGroups(lstOfUsers));
+	@Override
+	protected List<? extends ExternalIdmGroup> getGroupsModifiedSince(Date date, Long aLong) {
+		return null;
+	}
 
+	@Override
+	protected String[] getTenantManagerIdentifiers(Long aLong) {
+		return new String[0];
+	}
 
-    }
+	@Override
+	protected String[] getTenantAdminIdentifiers(Long aLong) {
+		return new String[0];
+	}
 
-    @Override
-    protected List<? extends ExternalIdmUser> getUsersModifiedSince(Date date, Long aLong) {
-        return null;
-    }
+	@Override
+	protected String getScheduledFullSyncCronExpression() {
 
-    @Override
-    protected List<? extends ExternalIdmGroup> getGroupsModifiedSince(Date date, Long aLong) {
-        return null;
-    }
+		if (!this.keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
 
-    @Override
-    protected String[] getTenantManagerIdentifiers(Long aLong) {
-        return new String[0];
-    }
+			return null;
+		}
 
-    @Override
-    protected String[] getTenantAdminIdentifiers(Long aLong) {
-        return new String[0];
-    }
+		return environment.getProperty("keycloak.synchronization.full.cronExpression");
+	}
 
-    @Override
-    protected String getScheduledFullSyncCronExpression() {
+	@Override
+	protected String getScheduledDifferentialSyncCronExpression() {
 
-        if(!this.keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
+		if (!this.keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
 
-            return null;
-        }
+			return null;
+		}
 
-        return environment.getProperty("keycloak.synchronization.full.cronExpression");
-    }
+		return environment.getProperty("keycloak.synchronization.differential.cronExpression");
+	}
 
-    @Override
-    protected String getScheduledDifferentialSyncCronExpression() {
+	@Override
+	protected void additionalPostConstruct() {
 
-        if(!this.keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
-
-            return null;
-        }
-
-        return environment.getProperty("keycloak.synchronization.differential.cronExpression");
-    }
-
-    @Override
-    protected void additionalPostConstruct() {
-
-    }
+	}
 }

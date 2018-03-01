@@ -9,15 +9,14 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 @PropertySource("classpath:activiti-keycloak.properties")
 public class KeyCloakPropertyLoader {
 
+	/**
+	 * Creates the Property place Holder to load the
+	 *
+	 * @return {@code org.springframework.context.support.PropertySourcesPlaceholderConfigurer}
+	 */
+	@Bean
+	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 
-    /**
-     * Creates the Property place Holder to load the
-     *
-     * @return {@code org.springframework.context.support.PropertySourcesPlaceholderConfigurer}
-     */
-    @Bean
-    public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-
-        return new PropertySourcesPlaceholderConfigurer();
-    }
+		return new PropertySourcesPlaceholderConfigurer();
+	}
 }

@@ -4,24 +4,21 @@ import com.activiti.api.boot.BootstrapConfigurer;
 import com.activiti.extension.bean.FileSyncService;
 import com.activiti.extension.bean.KeyCloakEnabled;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 
 @Configuration
 public class ActivityBootstrapConfigurer implements BootstrapConfigurer {
 
-    @Autowired
-    private FileSyncService fileSyncService;
+	@Autowired
+	private FileSyncService fileSyncService;
 
+	@Autowired
+	private KeyCloakEnabled keyCloakEnabled;
 
-    @Autowired
-    private KeyCloakEnabled keyCloakEnabled;
+	public void applicationContextInitialized(org.springframework.context.ApplicationContext applicationContext) {
 
-    public void applicationContextInitialized(org.springframework.context.ApplicationContext applicationContext) {
-
-        if(!this.keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
-            fileSyncService.asyncExecuteFullSynchronizationIfNeeded(null);
-        }
-    }
+		if (!this.keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
+			fileSyncService.asyncExecuteFullSynchronizationIfNeeded(null);
+		}
+	}
 }

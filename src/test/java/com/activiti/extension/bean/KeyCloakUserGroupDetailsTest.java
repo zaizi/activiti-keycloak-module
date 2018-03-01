@@ -29,349 +29,321 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class KeyCloakUserGroupDetailsTest {
 
+	@InjectMocks
+	private KeyCloakUserGroupDetails keyCloakUserGroupDetails;
+
+	@Mock
+	private Keycloak keyCloakClient;
+
+	@Mock
+	private RealmResource realmsResource;
+
+	@Mock
+	private GroupsResource groupsResource;
+
+	@Mock
+	private UsersResource usersResource;
+
+	@Mock
+	private GroupResource groupResource;
+
+	/**
+	 * Initiate the mock objects as required by test case
+	 */
+	private void mock() {
+		when(keyCloakClient.realm(Mockito.anyString())).thenReturn(realmsResource);
+		when(realmsResource.groups()).thenReturn(groupsResource);
+		keyCloakUserGroupDetails.setRealmName("test");
+	}
+
+	/**
+	 * Stubbed Object for the User Rpresentation from KeyCloak
+	 * 
+	 * @param lstOfUsers
+	 *            - List of Users
+	 * @param name
+	 *            - User Name
+	 */
+	private void addUserRepresentation(List<UserRepresentation> lstOfUsers, String name, boolean isEnabled) {
 
-    @InjectMocks
-    private KeyCloakUserGroupDetails keyCloakUserGroupDetails;
+		UserRepresentation userRepresentation = new UserRepresentation();
+		userRepresentation.setId(name);
+		userRepresentation.setUsername(name);
+		userRepresentation.setEnabled(isEnabled);
+		lstOfUsers.add(userRepresentation);
+	}
 
-    @Mock
-    private Keycloak keyCloakClient;
+	/**
+	 * Stub Creation for the Groups from Key Cloak
+	 * 
+	 * @param lstOfGroups
+	 *            - List of Group
+	 * @param name
+	 *            - Group Name
+	 */
 
-    @Mock
-    private RealmResource realmsResource;
+	private void addGroupRepresentation(List<GroupRepresentation> lstOfGroups, String name) {
 
-    @Mock
-    private GroupsResource groupsResource;
+		GroupRepresentation groupRepresentation = new GroupRepresentation();
+		groupRepresentation.setName(name);
+		lstOfGroups.add(groupRepresentation);
+	}
 
-    @Mock
-    private UsersResource usersResource;
+	/**
+	 * Creation of List of Activity Users
+	 * 
+	 * @param lstOfUsers
+	 *            - List of users
+	 * @param name
+	 *            -: User Name
+	 */
+	private void addExternalUserIdm(List<ExternalIdmUserImpl> lstOfUsers, String name) {
 
+		ExternalIdmUserImpl userRepresentation = new ExternalIdmUserImpl();
+		userRepresentation.setId(name);
+		userRepresentation.setFirstName(name);
+		lstOfUsers.add(userRepresentation);
+	}
 
-    @Mock
-    private GroupResource groupResource;
+	@Before
+	public void setup() {
+		mock();
+	}
 
+	/**
+	 * Test GetUsers from KeyCloak which gets some users
+	 *
+	 * {@link KeyCloakUserGroupDetails#getUsers()}
+	 */
 
-    /**
-     * Initiate the mock objects as required by test case
-     */
-    private void mock() {
-        when(keyCloakClient.realm(Mockito.anyString())).thenReturn(realmsResource);
-        when(realmsResource.groups()).thenReturn(groupsResource);
-        keyCloakUserGroupDetails.setRealmName("test");
-    }
+	@Test
+	public void getKeyCloakUsers() {
 
+		List<UserRepresentation> lstOfUsers = new ArrayList<>();
+		addUserRepresentation(lstOfUsers, "SuperUser", true);
+		addUserRepresentation(lstOfUsers, "tempUser", false);
 
-    /**
-     * Stubbed Object for the User Rpresentation from KeyCloak
-     * @param lstOfUsers - List of Users
-     * @param name - User Name
-     */
-    private void addUserRepresentation(List<UserRepresentation> lstOfUsers, String name, boolean isEnabled) {
+		when(realmsResource.users()).thenReturn(usersResource);
 
-        UserRepresentation userRepresentation = new UserRepresentation();
-        userRepresentation.setId(name);
-        userRepresentation.setUsername(name);
-        userRepresentation.setEnabled(isEnabled);
-        lstOfUsers.add(userRepresentation);
-    }
+		when(usersResource.list()).thenReturn(lstOfUsers);
 
+		List<ExternalIdmUserImpl> users = keyCloakUserGroupDetails.getUsers();
 
-    /**
-     * Stub Creation for the Groups from Key Cloak
-     * @param lstOfGroups - List of Group
-     * @param name - Group Name
-     */
+		assertEquals(1, users.size());
 
-    private void addGroupRepresentation(List<GroupRepresentation> lstOfGroups, String name) {
+	}
 
-        GroupRepresentation groupRepresentation = new GroupRepresentation();
-        groupRepresentation.setName(name);
-        lstOfGroups.add(groupRepresentation);
-    }
+	/**
+	 * Test GetUsers from KeyCloak which has null users
+	 *
+	 * {@link KeyCloakUserGroupDetails#getUsers()}
+	 */
 
+	@Test
+	public void getKeyCloakUsersNoUsersRegisterInKeyCloak() {
 
-    /**
-     * Creation of List of Activity Users
-     * @param lstOfUsers - List of users
-     * @param name -: User Name
-     */
-    private void addExternalUserIdm(List<ExternalIdmUserImpl> lstOfUsers, String name) {
+		when(realmsResource.users()).thenReturn(usersResource);
 
-        ExternalIdmUserImpl userRepresentation = new ExternalIdmUserImpl();
-        userRepresentation.setId(name);
-        userRepresentation.setFirstName(name);
-        lstOfUsers.add(userRepresentation);
-    }
+		when(usersResource.list()).thenReturn(null);
 
+		List<ExternalIdmUserImpl> users = keyCloakUserGroupDetails.getUsers();
 
+		assertTrue(users.isEmpty());
 
+	}
 
-    @Before
-    public void setup() {
-        mock();
-    }
+	/**
+	 * Test GetUsers from KeyCloak which has empty users
+	 *
+	 * {@link KeyCloakUserGroupDetails#getUsers()}
+	 */
 
+	@Test
+	public void getKeyCloakUsersEmptyUsersRegisterInKeyCloak() {
 
-    /**
-     * Test GetUsers from KeyCloak which gets some users
-     *
-     * {@link KeyCloakUserGroupDetails#getUsers()}
-     */
+		when(realmsResource.users()).thenReturn(usersResource);
 
-    @Test
-    public void getKeyCloakUsers() {
+		when(usersResource.list()).thenReturn(Collections.emptyList());
 
-        List<UserRepresentation> lstOfUsers = new ArrayList<>();
-        addUserRepresentation(lstOfUsers, "SuperUser", true);
-        addUserRepresentation(lstOfUsers, "tempUser", false);
+		List<ExternalIdmUserImpl> users = keyCloakUserGroupDetails.getUsers();
 
-        when(realmsResource.users()).thenReturn(usersResource);
+		assertTrue(users.isEmpty());
 
-        when(usersResource.list()).thenReturn(lstOfUsers);
+	}
 
-        List<ExternalIdmUserImpl> users = keyCloakUserGroupDetails.getUsers();
+	/**
+	 * Test get Groups from KeyCloak which has no users
+	 *
+	 * {@link KeyCloakUserGroupDetails#getGroups(java.util.List)}
+	 */
 
-        assertEquals(1, users.size());
+	@Test
+	public void getKeyCloakGroupsWithNoMembersAssignedToGroups() {
 
-    }
+		List<ExternalIdmUserImpl> lstOfUsers = new ArrayList<>();
+		addExternalUserIdm(lstOfUsers, "SuperUser");
+		addExternalUserIdm(lstOfUsers, "tempUser");
 
+		List<GroupRepresentation> lstOfGroups = new ArrayList<>();
+		addGroupRepresentation(lstOfGroups, "SuperUser");
+		addGroupRepresentation(lstOfGroups, "tempUser");
 
-    /**
-     * Test GetUsers from KeyCloak which has null users
-     *
-     * {@link KeyCloakUserGroupDetails#getUsers()}
-     */
+		when(realmsResource.groups()).thenReturn(groupsResource);
 
-    @Test
-    public void getKeyCloakUsersNoUsersRegisterInKeyCloak() {
+		when(groupsResource.groups()).thenReturn(lstOfGroups);
 
+		when(groupsResource.group(Mockito.anyString())).thenReturn(groupResource);
+		when(groupResource.members()).thenReturn(null);
 
-        when(realmsResource.users()).thenReturn(usersResource);
+		List<ExternalIdmGroupImpl> results = keyCloakUserGroupDetails.getGroups(lstOfUsers);
 
-        when(usersResource.list()).thenReturn(null);
+		assertEquals(2, results.size());
 
-        List<ExternalIdmUserImpl> users = keyCloakUserGroupDetails.getUsers();
+	}
 
-        assertTrue(users.isEmpty());
+	/**
+	 * Test get Groups from KeyCloak which has Empty users
+	 *
+	 * {@link KeyCloakUserGroupDetails#getGroups(java.util.List)}
+	 */
+	@Test
+	public void getKeyCloakGroupsWithEmptyMembersAssignedToGroups() {
 
-    }
+		List<ExternalIdmUserImpl> lstOfUsers = new ArrayList<>();
+		addExternalUserIdm(lstOfUsers, "SuperUser");
+		addExternalUserIdm(lstOfUsers, "tempUser");
 
+		List<GroupRepresentation> lstOfGroups = new ArrayList<>();
+		addGroupRepresentation(lstOfGroups, "SuperUser");
+		addGroupRepresentation(lstOfGroups, "tempUser");
 
-    /**
-     * Test GetUsers from KeyCloak which has empty users
-     *
-     * {@link KeyCloakUserGroupDetails#getUsers()}
-     */
+		when(realmsResource.groups()).thenReturn(groupsResource);
 
-    @Test
-    public void getKeyCloakUsersEmptyUsersRegisterInKeyCloak() {
+		when(groupsResource.groups()).thenReturn(lstOfGroups);
 
+		when(groupsResource.group(Mockito.anyString())).thenReturn(groupResource);
+		when(groupResource.members()).thenReturn(Collections.emptyList());
 
-        when(realmsResource.users()).thenReturn(usersResource);
+		List<ExternalIdmGroupImpl> results = keyCloakUserGroupDetails.getGroups(lstOfUsers);
 
-        when(usersResource.list()).thenReturn(Collections.emptyList());
+		assertEquals(2, results.size());
 
-        List<ExternalIdmUserImpl> users = keyCloakUserGroupDetails.getUsers();
+	}
 
-        assertTrue(users.isEmpty());
+	/**
+	 * Test get Groups from KeyCloak which has users
+	 *
+	 * {@link KeyCloakUserGroupDetails#getGroups(java.util.List)}
+	 */
+	@Test
+	public void getKeyCloakGroupsWithMembersAssignedToGroups() {
 
-    }
+		List<ExternalIdmUserImpl> lstOfUsers = new ArrayList<>();
+		addExternalUserIdm(lstOfUsers, "SuperUser");
+		addExternalUserIdm(lstOfUsers, "tempUser");
 
+		List<UserRepresentation> lstOfUsersRepresentation = new ArrayList<>();
+		addUserRepresentation(lstOfUsersRepresentation, "SuperUser", true);
+		addUserRepresentation(lstOfUsersRepresentation, "tempUser", true);
 
+		List<GroupRepresentation> lstOfGroups = new ArrayList<>();
+		addGroupRepresentation(lstOfGroups, "SuperUser");
+		addGroupRepresentation(lstOfGroups, "tempUser");
 
-    /**
-     * Test get Groups from KeyCloak which has no users
-     *
-     * {@link KeyCloakUserGroupDetails#getGroups(java.util.List)}
-     */
+		when(realmsResource.groups()).thenReturn(groupsResource);
 
-    @Test
-    public void getKeyCloakGroupsWithNoMembersAssignedToGroups() {
+		when(groupsResource.groups()).thenReturn(lstOfGroups);
 
-        List<ExternalIdmUserImpl> lstOfUsers = new ArrayList<>();
-        addExternalUserIdm(lstOfUsers, "SuperUser");
-        addExternalUserIdm(lstOfUsers, "tempUser");
+		when(groupsResource.group(Mockito.anyString())).thenReturn(groupResource);
+		when(groupResource.members()).thenReturn(lstOfUsersRepresentation);
 
-        List<GroupRepresentation> lstOfGroups = new ArrayList<>();
-        addGroupRepresentation(lstOfGroups, "SuperUser");
-        addGroupRepresentation(lstOfGroups, "tempUser");
+		List<ExternalIdmGroupImpl> results = keyCloakUserGroupDetails.getGroups(lstOfUsers);
 
-        when(realmsResource.groups()).thenReturn(groupsResource);
+		assertEquals(2, results.size());
 
-        when(groupsResource.groups()).thenReturn(lstOfGroups);
+		assertEquals(2, results.get(0).getUsers().size());
+		assertEquals(2, results.get(1).getUsers().size());
 
-        when(groupsResource.group(Mockito.anyString())).thenReturn(groupResource);
-        when(groupResource.members()).thenReturn(null);
+	}
 
-        List<ExternalIdmGroupImpl> results = keyCloakUserGroupDetails.getGroups(lstOfUsers);
+	/**
+	 * Test get Groups from KeyCloak which has users
+	 *
+	 * {@link KeyCloakUserGroupDetails#getGroups(java.util.List)}
+	 */
+	@Test
+	public void getKeyCloakGroupsWithMembersAssignedToGroupsEmptyUsersFromKeyCloak() {
 
-        assertEquals(2, results.size());
+		List<ExternalIdmUserImpl> lstOfUsers = new ArrayList<>();
+		addExternalUserIdm(lstOfUsers, "SuperUser");
+		addExternalUserIdm(lstOfUsers, "tempUser");
 
-    }
+		List<UserRepresentation> lstOfUsersRepresentation = new ArrayList<>();
+		addUserRepresentation(lstOfUsersRepresentation, "SuperUser", true);
+		addUserRepresentation(lstOfUsersRepresentation, "tempUser", false);
 
+		List<GroupRepresentation> lstOfGroups = new ArrayList<>();
+		addGroupRepresentation(lstOfGroups, "SuperUser");
+		addGroupRepresentation(lstOfGroups, "tempUser");
 
-    /**
-     * Test get Groups from KeyCloak which has Empty users
-     *
-     * {@link KeyCloakUserGroupDetails#getGroups(java.util.List)}
-     */
-    @Test
-    public void getKeyCloakGroupsWithEmptyMembersAssignedToGroups() {
+		when(realmsResource.groups()).thenReturn(groupsResource);
 
-        List<ExternalIdmUserImpl> lstOfUsers = new ArrayList<>();
-        addExternalUserIdm(lstOfUsers, "SuperUser");
-        addExternalUserIdm(lstOfUsers, "tempUser");
+		when(groupsResource.groups()).thenReturn(lstOfGroups);
 
-        List<GroupRepresentation> lstOfGroups = new ArrayList<>();
-        addGroupRepresentation(lstOfGroups, "SuperUser");
-        addGroupRepresentation(lstOfGroups, "tempUser");
+		when(groupsResource.group(Mockito.anyString())).thenReturn(groupResource);
+		when(groupResource.members()).thenReturn(lstOfUsersRepresentation);
 
-        when(realmsResource.groups()).thenReturn(groupsResource);
+		List<ExternalIdmGroupImpl> results = keyCloakUserGroupDetails.getGroups(Collections.emptyList());
 
-        when(groupsResource.groups()).thenReturn(lstOfGroups);
+		assertEquals(2, results.size());
 
-        when(groupsResource.group(Mockito.anyString())).thenReturn(groupResource);
-        when(groupResource.members()).thenReturn(Collections.emptyList());
+		assertEquals(0, results.get(0).getUsers().size());
+		assertEquals(0, results.get(1).getUsers().size());
 
-        List<ExternalIdmGroupImpl> results = keyCloakUserGroupDetails.getGroups(lstOfUsers);
+	}
 
-        assertEquals(2, results.size());
+	/**
+	 * Test get Groups from KeyCloak which has no groups
+	 *
+	 * {@link KeyCloakUserGroupDetails#getGroups(java.util.List)}
+	 */
+	@Test
+	public void getKeyCloakNoGroups() {
 
-    }
+		List<ExternalIdmUserImpl> lstOfUsers = new ArrayList<>();
+		addExternalUserIdm(lstOfUsers, "SuperUser");
+		addExternalUserIdm(lstOfUsers, "tempUser");
 
+		when(realmsResource.groups()).thenReturn(groupsResource);
 
+		when(groupsResource.groups()).thenReturn(null);
 
+		List<ExternalIdmGroupImpl> results = keyCloakUserGroupDetails.getGroups(lstOfUsers);
 
+		assertTrue(results.isEmpty());
 
-    /**
-     * Test get Groups from KeyCloak which has  users
-     *
-     * {@link KeyCloakUserGroupDetails#getGroups(java.util.List)}
-     */
-    @Test
-    public void getKeyCloakGroupsWithMembersAssignedToGroups() {
+	}
 
-        List<ExternalIdmUserImpl> lstOfUsers = new ArrayList<>();
-        addExternalUserIdm(lstOfUsers, "SuperUser");
-        addExternalUserIdm(lstOfUsers, "tempUser");
+	/**
+	 * Test get Groups from KeyCloak which has no groups
+	 *
+	 * {@link KeyCloakUserGroupDetails#getGroups(java.util.List)}
+	 */
+	@Test
+	public void getKeyCloakEmptyGroups() {
 
-        List<UserRepresentation> lstOfUsersRepresentation = new ArrayList<>();
-        addUserRepresentation(lstOfUsersRepresentation, "SuperUser", true);
-        addUserRepresentation(lstOfUsersRepresentation, "tempUser", true);
+		List<ExternalIdmUserImpl> lstOfUsers = new ArrayList<>();
+		addExternalUserIdm(lstOfUsers, "SuperUser");
+		addExternalUserIdm(lstOfUsers, "tempUser");
 
+		when(realmsResource.groups()).thenReturn(groupsResource);
 
-        List<GroupRepresentation> lstOfGroups = new ArrayList<>();
-        addGroupRepresentation(lstOfGroups, "SuperUser");
-        addGroupRepresentation(lstOfGroups, "tempUser");
+		when(groupsResource.groups()).thenReturn(Collections.emptyList());
 
-        when(realmsResource.groups()).thenReturn(groupsResource);
+		List<ExternalIdmGroupImpl> results = keyCloakUserGroupDetails.getGroups(lstOfUsers);
 
-        when(groupsResource.groups()).thenReturn(lstOfGroups);
+		assertTrue(results.isEmpty());
 
-        when(groupsResource.group(Mockito.anyString())).thenReturn(groupResource);
-        when(groupResource.members()).thenReturn(lstOfUsersRepresentation);
-
-        List<ExternalIdmGroupImpl> results = keyCloakUserGroupDetails.getGroups(lstOfUsers);
-
-        assertEquals(2, results.size());
-
-        assertEquals(2, results.get(0).getUsers().size());
-        assertEquals(2, results.get(1).getUsers().size());
-
-    }
-
-
-
-
-
-    /**
-     * Test get Groups from KeyCloak which has  users
-     *
-     * {@link KeyCloakUserGroupDetails#getGroups(java.util.List)}
-     */
-    @Test
-    public void getKeyCloakGroupsWithMembersAssignedToGroupsEmptyUsersFromKeyCloak() {
-
-        List<ExternalIdmUserImpl> lstOfUsers = new ArrayList<>();
-        addExternalUserIdm(lstOfUsers, "SuperUser");
-        addExternalUserIdm(lstOfUsers, "tempUser");
-
-        List<UserRepresentation> lstOfUsersRepresentation = new ArrayList<>();
-        addUserRepresentation(lstOfUsersRepresentation, "SuperUser", true);
-        addUserRepresentation(lstOfUsersRepresentation, "tempUser", false);
-
-
-        List<GroupRepresentation> lstOfGroups = new ArrayList<>();
-        addGroupRepresentation(lstOfGroups, "SuperUser");
-        addGroupRepresentation(lstOfGroups, "tempUser");
-
-        when(realmsResource.groups()).thenReturn(groupsResource);
-
-        when(groupsResource.groups()).thenReturn(lstOfGroups);
-
-        when(groupsResource.group(Mockito.anyString())).thenReturn(groupResource);
-        when(groupResource.members()).thenReturn(lstOfUsersRepresentation);
-
-        List<ExternalIdmGroupImpl> results = keyCloakUserGroupDetails.getGroups(Collections.emptyList());
-
-        assertEquals(2, results.size());
-
-        assertEquals(0, results.get(0).getUsers().size());
-        assertEquals(0, results.get(1).getUsers().size());
-
-    }
-
-
-    /**
-     * Test get Groups from KeyCloak which has no groups
-     *
-     * {@link KeyCloakUserGroupDetails#getGroups(java.util.List)}
-     */
-    @Test
-    public void getKeyCloakNoGroups() {
-
-        List<ExternalIdmUserImpl> lstOfUsers = new ArrayList<>();
-        addExternalUserIdm(lstOfUsers, "SuperUser");
-        addExternalUserIdm(lstOfUsers, "tempUser");
-
-
-        when(realmsResource.groups()).thenReturn(groupsResource);
-
-        when(groupsResource.groups()).thenReturn(null);
-
-        List<ExternalIdmGroupImpl> results = keyCloakUserGroupDetails.getGroups(lstOfUsers);
-
-        assertTrue(results.isEmpty());
-
-
-
-    }
-
-
-    /**
-     * Test get Groups from KeyCloak which has no groups
-     *
-     * {@link KeyCloakUserGroupDetails#getGroups(java.util.List)}
-     */
-    @Test
-    public void getKeyCloakEmptyGroups() {
-
-        List<ExternalIdmUserImpl> lstOfUsers = new ArrayList<>();
-        addExternalUserIdm(lstOfUsers, "SuperUser");
-        addExternalUserIdm(lstOfUsers, "tempUser");
-
-
-        when(realmsResource.groups()).thenReturn(groupsResource);
-
-        when(groupsResource.groups()).thenReturn(Collections.emptyList());
-
-        List<ExternalIdmGroupImpl> results = keyCloakUserGroupDetails.getGroups(lstOfUsers);
-
-        assertTrue(results.isEmpty());
-
-
-
-    }
-
-
+	}
 
 }

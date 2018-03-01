@@ -1,7 +1,5 @@
 package com.zaizi.authentication;
 
-
-;
 import com.activiti.extension.bean.KeyCloakEnabled;
 import com.zaizi.authentication.CustomizeDaoAuthenticationProvider;
 import com.zaizi.authentication.KeyCloakAuthenticationProvider;
@@ -32,170 +30,165 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class KeyCloakAuthenticationProviderTest {
 
-    @Spy
-    private KeyCloakAuthenticationProvider keyCloakAuthenticationProvider;
+	@Spy
+	private KeyCloakAuthenticationProvider keyCloakAuthenticationProvider;
 
+	@Mock
+	private Environment environment;
 
-    @Mock
-    private Environment environment;
+	@Mock
+	private CustomizeDaoAuthenticationProvider customizeDaoAuthenticationProvider;
 
-    @Mock
-    private CustomizeDaoAuthenticationProvider customizeDaoAuthenticationProvider;
+	@Mock
+	private KeyCloakEnabled keyCloakEnabled;
 
-    @Mock
-    private KeyCloakEnabled keyCloakEnabled;
+	@Mock
+	private KeycloakBuilder builder;
 
-    @Mock
-    private KeycloakBuilder builder;
+	@Mock
+	private Keycloak client;
 
-    @Mock
-    private Keycloak client;
+	@Mock
+	private RealmResource realmsResource;
 
+	@Before
+	public void setUp() {
 
-    @Mock
-    private RealmResource realmsResource;
+		keyCloakAuthenticationProvider.setKeyCloakEnabled(keyCloakEnabled);
+		keyCloakAuthenticationProvider.setCustomizeDaoAuthenticationProvider(customizeDaoAuthenticationProvider);
+		keyCloakAuthenticationProvider.setEnvironment(environment);
+	}
 
+	/**
+	 * Test Retrieve User Details
+	 * <p>
+	 * {@link KeyCloakAuthenticationProvider#retrieveUser(java.lang.String, org.springframework.security.authentication.UsernamePasswordAuthenticationToken)}
+	 */
+	@Test
+	public void verifyUserRetrieveDetails() {
 
-    @Before
-    public void setUp() {
+		GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("user");
 
-        keyCloakAuthenticationProvider.setKeyCloakEnabled(keyCloakEnabled);
-        keyCloakAuthenticationProvider.setCustomizeDaoAuthenticationProvider(customizeDaoAuthenticationProvider);
-        keyCloakAuthenticationProvider.setEnvironment(environment);
-    }
+		UserDetails stubUserDetails = new User("test", "test", Collections.singletonList(grantedAuthority));
+		when(customizeDaoAuthenticationProvider.retrieveUserDetails(Mockito.anyString(),
+				Mockito.any(UsernamePasswordAuthenticationToken.class))).thenReturn(stubUserDetails);
 
+		UserDetails userDetails = keyCloakAuthenticationProvider.retrieveUser("test",
+				new UsernamePasswordAuthenticationToken("test", "test"));
 
-    /**
-     * Test Retrieve User Details
-     * <p>
-     * {@link KeyCloakAuthenticationProvider#retrieveUser(java.lang.String, org.springframework.security.authentication.UsernamePasswordAuthenticationToken)}
-     */
-    @Test
-    public void verifyUserRetrieveDetails() {
+		assertNotNull(userDetails);
 
-        GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("user");
+		verify(customizeDaoAuthenticationProvider, times(1)).retrieveUserDetails(Mockito.anyString(),
+				Mockito.any(UsernamePasswordAuthenticationToken.class));
+	}
 
-        UserDetails stubUserDetails = new User("test", "test", Collections.singletonList(grantedAuthority));
-        when(customizeDaoAuthenticationProvider.retrieveUserDetails(Mockito.anyString(), Mockito.any(UsernamePasswordAuthenticationToken.class))).thenReturn(stubUserDetails);
+	/**
+	 * Test the Authentication of the User details
+	 * <p>
+	 * {@link KeyCloakAuthenticationProvider#additionalAuthenticationChecks(org.springframework.security.core.userdetails.UserDetails, org.springframework.security.authentication.UsernamePasswordAuthenticationToken)}
+	 */
+	@Test
+	public void verifyStandardAuthentication() {
 
-        UserDetails userDetails = keyCloakAuthenticationProvider.retrieveUser("test", new UsernamePasswordAuthenticationToken("test", "test"));
+		GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("user");
 
-        assertNotNull(userDetails);
+		UserDetails stubUserDetails = new User("test", "test", Collections.singletonList(grantedAuthority));
 
-        verify(customizeDaoAuthenticationProvider, times(1)).retrieveUserDetails(Mockito.anyString(), Mockito.any(UsernamePasswordAuthenticationToken.class));
-    }
+		when(keyCloakEnabled.isKeyCloakSynchronizeEnabled()).thenReturn(false);
 
+		doNothing().when(customizeDaoAuthenticationProvider).additionalAuthenticationChecks(
+				Mockito.any(UserDetails.class), Mockito.any(UsernamePasswordAuthenticationToken.class));
 
-    /**
-     * Test the Authentication of the User details
-     * <p>
-     * {@link KeyCloakAuthenticationProvider#additionalAuthenticationChecks(org.springframework.security.core.userdetails.UserDetails, org.springframework.security.authentication.UsernamePasswordAuthenticationToken)}
-     */
-    @Test
-    public void verifyStandardAuthentication() {
+		keyCloakAuthenticationProvider.additionalAuthenticationChecks(stubUserDetails,
+				new UsernamePasswordAuthenticationToken("test", "test"));
 
+		assertTrue(true);
 
-        GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("user");
+		verify(customizeDaoAuthenticationProvider, times(1)).additionalAuthenticationChecks(
+				Mockito.any(UserDetails.class), Mockito.any(UsernamePasswordAuthenticationToken.class));
 
-        UserDetails stubUserDetails = new User("test", "test", Collections.singletonList(grantedAuthority));
+	}
 
+	/**
+	 * Test the Authentication of the User details
+	 * <p>
+	 * {@link KeyCloakAuthenticationProvider#additionalAuthenticationChecks(org.springframework.security.core.userdetails.UserDetails, org.springframework.security.authentication.UsernamePasswordAuthenticationToken)}
+	 */
+	@Test
+	public void verifyKeyCloakAuthentication() {
 
-        when(keyCloakEnabled.isKeyCloakSynchronizeEnabled()).thenReturn(false);
+		GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("user");
 
-        doNothing().when(customizeDaoAuthenticationProvider).additionalAuthenticationChecks(Mockito.any(UserDetails.class), Mockito.any(UsernamePasswordAuthenticationToken.class));
+		UserDetails stubUserDetails = new User("test", "test", Collections.singletonList(grantedAuthority));
 
-        keyCloakAuthenticationProvider.additionalAuthenticationChecks(stubUserDetails, new UsernamePasswordAuthenticationToken("test", "test"));
+		when(keyCloakEnabled.isKeyCloakSynchronizeEnabled()).thenReturn(true);
 
-        assertTrue(true);
+		when(keyCloakAuthenticationProvider.getKeyCloakBuilder()).thenReturn(builder);
 
-        verify(customizeDaoAuthenticationProvider, times(1)).additionalAuthenticationChecks(Mockito.any(UserDetails.class), Mockito.any(UsernamePasswordAuthenticationToken.class));
+		when(builder.serverUrl(Mockito.anyString())).thenReturn(builder);
+		when(builder.realm(Mockito.anyString())).thenReturn(builder);
+		when(builder.username(Mockito.anyString())).thenReturn(builder);
+		when(builder.password(Mockito.anyString())).thenReturn(builder);
+		when(builder.clientId(Mockito.anyString())).thenReturn(builder);
+		when(builder.clientSecret(Mockito.anyString())).thenReturn(builder);
+		when(builder.grantType(Mockito.anyString())).thenReturn(builder);
 
-    }
+		when(builder.build()).thenReturn(client);
+		when(client.realm(Mockito.anyString())).thenReturn(realmsResource);
+		when(realmsResource.toRepresentation()).thenReturn(new RealmRepresentation());
 
+		keyCloakAuthenticationProvider.additionalAuthenticationChecks(stubUserDetails,
+				new UsernamePasswordAuthenticationToken("test", "test"));
 
-    /**
-     * Test the Authentication of the User details
-     * <p>
-     * {@link KeyCloakAuthenticationProvider#additionalAuthenticationChecks(org.springframework.security.core.userdetails.UserDetails, org.springframework.security.authentication.UsernamePasswordAuthenticationToken)}
-     */
-    @Test
-    public void verifyKeyCloakAuthentication() {
+		assertTrue(true);
 
+		verify(customizeDaoAuthenticationProvider, times(0)).additionalAuthenticationChecks(
+				Mockito.any(UserDetails.class), Mockito.any(UsernamePasswordAuthenticationToken.class));
 
-        GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("user");
+	}
 
-        UserDetails stubUserDetails = new User("test", "test", Collections.singletonList(grantedAuthority));
+	/**
+	 * Test the Authentication of the User details
+	 * <p>
+	 * {@link KeyCloakAuthenticationProvider#additionalAuthenticationChecks(org.springframework.security.core.userdetails.UserDetails, org.springframework.security.authentication.UsernamePasswordAuthenticationToken)}
+	 */
+	@Test
+	public void verifyKeyCloakAuthenticationFailed() {
 
+		GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("user");
 
-        when(keyCloakEnabled.isKeyCloakSynchronizeEnabled()).thenReturn(true);
+		UserDetails stubUserDetails = new User("test", "test", Collections.singletonList(grantedAuthority));
 
-        when(keyCloakAuthenticationProvider.getKeyCloakBuilder()).thenReturn(builder);
+		when(keyCloakEnabled.isKeyCloakSynchronizeEnabled()).thenReturn(true);
 
-        when(builder.serverUrl(Mockito.anyString())).thenReturn(builder);
-        when(builder.realm(Mockito.anyString())).thenReturn(builder);
-        when(builder.username(Mockito.anyString())).thenReturn(builder);
-        when(builder.password(Mockito.anyString())).thenReturn(builder);
-        when(builder.clientId(Mockito.anyString())).thenReturn(builder);
-        when(builder.clientSecret(Mockito.anyString())).thenReturn(builder);
-        when(builder.grantType(Mockito.anyString())).thenReturn(builder);
+		when(keyCloakAuthenticationProvider.getKeyCloakBuilder()).thenReturn(builder);
 
-        when(builder.build()).thenReturn(client);
-        when(client.realm(Mockito.anyString())).thenReturn(realmsResource);
-        when(realmsResource.toRepresentation()).thenReturn(new RealmRepresentation());
+		when(builder.serverUrl(Mockito.anyString())).thenReturn(builder);
+		when(builder.realm(Mockito.anyString())).thenReturn(builder);
+		when(builder.username(Mockito.anyString())).thenReturn(builder);
+		when(builder.password(Mockito.anyString())).thenReturn(builder);
+		when(builder.clientId(Mockito.anyString())).thenReturn(builder);
+		when(builder.clientSecret(Mockito.anyString())).thenReturn(builder);
+		when(builder.grantType(Mockito.anyString())).thenReturn(builder);
 
-        keyCloakAuthenticationProvider.additionalAuthenticationChecks(stubUserDetails, new UsernamePasswordAuthenticationToken("test", "test"));
+		when(builder.build()).thenReturn(client);
+		when(client.realm(Mockito.anyString())).thenReturn(realmsResource);
+		when(realmsResource.toRepresentation()).thenThrow(new RuntimeException());
 
-        assertTrue(true);
+		try {
 
-        verify(customizeDaoAuthenticationProvider, times(0)).additionalAuthenticationChecks(Mockito.any(UserDetails.class), Mockito.any(UsernamePasswordAuthenticationToken.class));
+			keyCloakAuthenticationProvider.additionalAuthenticationChecks(stubUserDetails,
+					new UsernamePasswordAuthenticationToken("test", "test"));
+			fail();
+		} catch (AuthenticationException exception) {
+			assertTrue(true);
+		} catch (Exception exception) {
+			fail();
+		}
 
-    }
+		verify(customizeDaoAuthenticationProvider, times(0)).additionalAuthenticationChecks(
+				Mockito.any(UserDetails.class), Mockito.any(UsernamePasswordAuthenticationToken.class));
 
-
-    /**
-     * Test the Authentication of the User details
-     * <p>
-     * {@link KeyCloakAuthenticationProvider#additionalAuthenticationChecks(org.springframework.security.core.userdetails.UserDetails, org.springframework.security.authentication.UsernamePasswordAuthenticationToken)}
-     */
-    @Test
-    public void verifyKeyCloakAuthenticationFailed() {
-
-
-        GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("user");
-
-        UserDetails stubUserDetails = new User("test", "test", Collections.singletonList(grantedAuthority));
-
-
-        when(keyCloakEnabled.isKeyCloakSynchronizeEnabled()).thenReturn(true);
-
-        when(keyCloakAuthenticationProvider.getKeyCloakBuilder()).thenReturn(builder);
-
-        when(builder.serverUrl(Mockito.anyString())).thenReturn(builder);
-        when(builder.realm(Mockito.anyString())).thenReturn(builder);
-        when(builder.username(Mockito.anyString())).thenReturn(builder);
-        when(builder.password(Mockito.anyString())).thenReturn(builder);
-        when(builder.clientId(Mockito.anyString())).thenReturn(builder);
-        when(builder.clientSecret(Mockito.anyString())).thenReturn(builder);
-        when(builder.grantType(Mockito.anyString())).thenReturn(builder);
-
-        when(builder.build()).thenReturn(client);
-        when(client.realm(Mockito.anyString())).thenReturn(realmsResource);
-        when(realmsResource.toRepresentation()).thenThrow(new RuntimeException());
-
-        try {
-
-            keyCloakAuthenticationProvider.additionalAuthenticationChecks(stubUserDetails, new UsernamePasswordAuthenticationToken("test", "test"));
-            fail();
-        } catch (AuthenticationException exception) {
-            assertTrue(true);
-        } catch (Exception exception) {
-            fail();
-        }
-
-
-        verify(customizeDaoAuthenticationProvider, times(0)).additionalAuthenticationChecks(Mockito.any(UserDetails.class), Mockito.any(UsernamePasswordAuthenticationToken.class));
-
-    }
-
+	}
 
 }

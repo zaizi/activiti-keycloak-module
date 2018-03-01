@@ -10,28 +10,27 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.StandardPasswordEncoder;
-import org.springframework.stereotype.Component;
 
 @Configuration
-public class ActivitiSecurityOverride  implements AlfrescoSecurityConfigOverride {
+public class ActivitiSecurityOverride implements AlfrescoSecurityConfigOverride {
 
-    @Autowired
-    private KeyCloakEnabled keyCloakEnabled;
+	@Autowired
+	private KeyCloakEnabled keyCloakEnabled;
 
-    @Autowired
-    private Environment environment;
+	@Autowired
+	private Environment environment;
 
+	@Override
+	public void configureGlobal(AuthenticationManagerBuilder authenticationManagerBuilder,
+			UserDetailsService userDetailsService) {
 
-    @Override
-    public void configureGlobal(AuthenticationManagerBuilder authenticationManagerBuilder, UserDetailsService userDetailsService) {
-
-        KeyCloakAuthenticationProvider authenticationProvider = new KeyCloakAuthenticationProvider();
-        authenticationProvider.setEnvironment(environment);
-        authenticationProvider.setKeyCloakEnabled(keyCloakEnabled);
-        CustomizeDaoAuthenticationProvider customizeDaoAuthenticationProvider = new CustomizeDaoAuthenticationProvider();
-        customizeDaoAuthenticationProvider.setUserDetailsService(userDetailsService);
-        customizeDaoAuthenticationProvider.setPasswordEncoder(new StandardPasswordEncoder());
-        authenticationProvider.setCustomizeDaoAuthenticationProvider(customizeDaoAuthenticationProvider);
-        authenticationManagerBuilder.authenticationProvider(authenticationProvider);
-    }
+		KeyCloakAuthenticationProvider authenticationProvider = new KeyCloakAuthenticationProvider();
+		authenticationProvider.setEnvironment(environment);
+		authenticationProvider.setKeyCloakEnabled(keyCloakEnabled);
+		CustomizeDaoAuthenticationProvider customizeDaoAuthenticationProvider = new CustomizeDaoAuthenticationProvider();
+		customizeDaoAuthenticationProvider.setUserDetailsService(userDetailsService);
+		customizeDaoAuthenticationProvider.setPasswordEncoder(new StandardPasswordEncoder());
+		authenticationProvider.setCustomizeDaoAuthenticationProvider(customizeDaoAuthenticationProvider);
+		authenticationManagerBuilder.authenticationProvider(authenticationProvider);
+	}
 }
