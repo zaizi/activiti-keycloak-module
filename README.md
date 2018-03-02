@@ -1,4 +1,6 @@
-# Alfresco Activiti JAR Module - SDK 3
+# Activiti - Keycloak Module
+
+## Alfresco Activiti JAR Module - SDK 3
 
 To run use `mvn clean install alfresco:run` or `./run.sh` and verify that it 
 
@@ -7,7 +9,7 @@ To run use `mvn clean install alfresco:run` or `./run.sh` and verify that it
  * Optionally runs Activiti REST
  * Packages both a JAR with customization
   
-# Few things to notice
+## Few things to notice
 
  * No parent pom
  * WAR assembly is handled by the Alfresco Maven Plugin configuration
@@ -17,7 +19,7 @@ To run use `mvn clean install alfresco:run` or `./run.sh` and verify that it
  * [Configurable Run mojo](https://github.com/Alfresco/alfresco-sdk/blob/sdk-3.0/plugins/alfresco-maven-plugin/src/main/java/org/alfresco/maven/plugin/RunMojo.java) in the `alfresco-maven-plugin`
  * No unit testing/functional tests just yet
  
-# How to setup the module
+## How to setup the module
 
 Key properties to set (Property File can be find in resources folder as activities-keycloak.properties)
 
@@ -35,7 +37,7 @@ Key properties to set (Property File can be find in resources folder as activiti
 | security.authentication.use-externalid | To Enable Authentication by external ID. In case of KeyCloak is Synchronised , Keycloak Username becomes external ID on Synchronisation |
 | security.authentication.casesensitive | to Enable External ID Case Sensitivity |
 
-# Keycloak Docker Contianer 
+# Keycloak Docker Container
 ```sh
 docker run -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin --expose 9990 -p 9990 -p 8180:8080 jboss/keycloak
 ```
@@ -44,7 +46,7 @@ Connect to ``http://localhost:8180/auth/ ``
 
 This command creates "admin" user with the password as "admin"
 
-# KeyCloak Setup
+## KeyCloak Setup
  - Create the user with the admin role in master "Realm". Above Docker does that for us.
  - Create Client in master "Ream"  With the given ID
  - Set the Access Type of the Client to "Confidential" and set the Valid Redirect URL(Example : http://localhost:8080/activiti-app) and click Save
