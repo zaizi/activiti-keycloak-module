@@ -1,20 +1,13 @@
 package com.activiti.extension.bean;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.DefaultClock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.Map;
-import java.util.function.Function;
+import java.security.PublicKey;
 
 @Component
 public class JwtTokenUtil implements Serializable {
@@ -22,55 +15,46 @@ public class JwtTokenUtil implements Serializable {
 
     private static final long serialVersionUID = 6143879608320532812L;
 
-    private Clock clock = DefaultClock.INSTANCE;
-
     @Autowired
     private Environment environment;
 
-    public String getUsernameFromToken(String token) {
-        return getClaimFromToken(token, Claims::getSubject);
+    private PublicKey decodePublicKey;
+
+	/**
+	 * Set the Public key to verify and get the User Name
+	 * @param decodePublicKey : java.security.PublicKey
+	 */
+	public void setDecodePublicKey(PublicKey decodePublicKey) {
+        this.decodePublicKey = decodePublicKey;
     }
 
-    public Date getIssuedAtDateFromToken(String token) {
-        return getClaimFromToken(token, Claims::getIssuedAt);
+    /**
+     * Get the User Name from Token after Sign with the Publick Key
+     * @param token : JWT Token
+     * @return {@code String} : User name as String
+     */
+    public String verifyAndGetUserName(String token) {
+
+		final Claims claims = getAllClaimsFromToken(token);
+
+		if (claims.containsKey(this.environment.getProperty("keycloak.client.user.name.key"))) {
+			return (String) claims.get(this.environment.getProperty("keycloak.client.user.name.key"));
+		}
+		return null;
     }
 
-    public Date getExpirationDateFromToken(String token) {
-        return getClaimFromToken(token, Claims::getExpiration);
-    }
 
+    /**
+     * Signature Verify and Retrieve all the claims from Body of the Token
+     * @param token : JWT Token
+     * @return {@code io.jsonwebtoken.Claims}
+     */
+    private Claims getAllClaimsFromToken(String token)   {
 
-    public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = getAllClaimsFromToken(token);
-        return claimsResolver.apply(claims);
-    }
-
-    private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(this.environment.getProperty("keycloak.client.client.secret"))
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
-    private Boolean isTokenExpired(String token) {
-        final Date expiration = getExpirationDateFromToken(token);
-        return expiration.before(clock.now());
-    }
-
-    private Boolean isCreatedBeforeLastPasswordReset(Date created, Date lastPasswordReset) {
-        return (lastPasswordReset != null && created.before(lastPasswordReset));
-    }
-
-    public Boolean validateToken(String token, UserDetails userDetails) {
-        JwtUser user = (JwtUser) userDetails;
-        final String username = getUsernameFromToken(token);
-        final Date created = getIssuedAtDateFromToken(token);
-
-        return (
-              username.equals(user.getUsername())
-                    && !isTokenExpired(token)
-                    && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate())
-        );
+             return Jwts.parser()
+                    .setSigningKey(decodePublicKey)
+                    .parseClaimsJws(token)
+                    .getBody();
     }
 
 }
