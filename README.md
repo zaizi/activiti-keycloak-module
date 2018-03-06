@@ -36,6 +36,10 @@ Key properties to set (Property File can be find in resources folder as activiti
 | keycloak.client.realm | Realm to Load the Users and groups from |
 | security.authentication.use-externalid | To Enable Authentication by external ID. In case of KeyCloak is Synchronised , Keycloak Username becomes external ID on Synchronisation |
 | security.authentication.casesensitive | to Enable External ID Case Sensitivity |
+| keycloak.api.authentication.header | Key for the token that is sent to the Rest API
+| keycloak.api.uri.pattern |  URI Pattern that need to be authenticated , usally it is /api/**
+| keycloak.client.user.name.key | Given flexibility to find the user name in the JWT Token, generally it is preferred_username
+| keycloak.client.public.key    | Public Key of the realm, can be found in Realms Setting and  "Keys" Tab in RSA type , click Public Key Button
 
 # Keycloak Docker Container
 ```sh
@@ -47,12 +51,20 @@ Connect to ``http://localhost:8180/auth/ ``
 This command creates "admin" user with the password as "admin"
 
 ## KeyCloak Setup
+
+### Synchronisation
  - Create the user with the admin role in master "Realm". Above Docker does that for us.
- - Create Client in master "Ream"  With the given ID
+ - Create Client in master "Realm" and save it. Update the property ``keycloak.clientId`` in the activities-keycloak.properties
  - Set the Access Type of the Client to "Confidential" and set the Valid Redirect URL(Example : http://localhost:8080/activiti-app) and click Save
  - You should be able to see "Credentials" Tab for Client, click that , choose "Client ID and Secret" in Client Authenticator if not selected by default. 
  - Then copy the Secret Key or regenerate and copy. And Update in the properties file in Project as described above(keycloak.client.secret). 
  - Create a Realm you want to work on and copy the realm name and add it to Property file in the application for "Client Realm" (Property Key :  keycloak.client.realm)
  - Create Users and Groups in the created "Realm". Please note "First Name" and "Last Name" are must for Activiti.
  - To Enable Authenticate after the synchronisation, set the property true for "security.authentication.use-externalid"
+ 
+### Token authentication
+ - Set the Key name where the token can be found in the request. Order of finding is Header/Parameter/Attribute (Property Key keycloak.api.authentication.header)
+ - Set the URI Pattern to be authenticated, in our case we are authenticating rest api, so pattern is /api/** (Property Key : keycloak.api.uri.pattern)
+ - Set the User Name Key that Keycloak is setup to send in JWT. By default it is  preferred_username (Property Key : keycloak.client.user.name.key)
+ - Set the Public key from the realm, can be found in Realm setting Keys Tab and in RSA Type, click "Public Key" (Property Key : keycloak.client.public.key )
  
