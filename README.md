@@ -51,14 +51,18 @@ Connect to ``http://localhost:8180/auth/ ``
 This command creates "admin" user with the password as "admin"
 
 ## KeyCloak Setup
+
+### Synchronisation
  - Create the user with the admin role in master "Realm". Above Docker does that for us.
- - Create Client in master "Ream"  With the given ID
+ - Create Client in master "Realm" and save it. Update the property ``keycloak.clientId`` in the activities-keycloak.properties
  - Set the Access Type of the Client to "Confidential" and set the Valid Redirect URL(Example : http://localhost:8080/activiti-app) and click Save
  - You should be able to see "Credentials" Tab for Client, click that , choose "Client ID and Secret" in Client Authenticator if not selected by default. 
  - Then copy the Secret Key or regenerate and copy. And Update in the properties file in Project as described above(keycloak.client.secret). 
  - Create a Realm you want to work on and copy the realm name and add it to Property file in the application for "Client Realm" (Property Key :  keycloak.client.realm)
  - Create Users and Groups in the created "Realm". Please note "First Name" and "Last Name" are must for Activiti.
  - To Enable Authenticate after the synchronisation, set the property true for "security.authentication.use-externalid"
+ 
+### Token authentication
  - Set the Key name where the token can be found in the request. Order of finding is Header/Parameter/Attribute (Property Key keycloak.api.authentication.header)
  - Set the URI Pattern to be authenticated, in our case we are authenticating rest api, so pattern is /api/** (Property Key : keycloak.api.uri.pattern)
  - Set the User Name Key that Keycloak is setup to send in JWT. By default it is  preferred_username (Property Key : keycloak.client.user.name.key)
