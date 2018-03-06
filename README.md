@@ -36,6 +36,10 @@ Key properties to set (Property File can be find in resources folder as activiti
 | keycloak.client.realm | Realm to Load the Users and groups from |
 | security.authentication.use-externalid | To Enable Authentication by external ID. In case of KeyCloak is Synchronised , Keycloak Username becomes external ID on Synchronisation |
 | security.authentication.casesensitive | to Enable External ID Case Sensitivity |
+| keycloak.api.authentication.header | Key for the token that is sent to the Rest API
+| keycloak.api.uri.pattern |  URI Pattern that need to be authenticated , usally it is /api/**
+| keycloak.client.user.name.key | Given flexibility to find the user name in the JWT Token, generally it is preferred_username
+| keycloak.client.public.key    | Public Key of the realm, can be found in Realms Setting and  "Keys" Tab in RSA type , click Public Key Button
 
 # Keycloak Docker Container
 ```sh
@@ -55,4 +59,8 @@ This command creates "admin" user with the password as "admin"
  - Create a Realm you want to work on and copy the realm name and add it to Property file in the application for "Client Realm" (Property Key :  keycloak.client.realm)
  - Create Users and Groups in the created "Realm". Please note "First Name" and "Last Name" are must for Activiti.
  - To Enable Authenticate after the synchronisation, set the property true for "security.authentication.use-externalid"
+ - Set the Key name where the token can be found in the request. Order of finding is Header/Parameter/Attribute
+ - Set the URI Pattern to be authenticated, in our case we are authenticating rest api, so pattern is /api/**
+ - Set the User Name Key that Keycloak is setup to send in JWT. By default it is  preferred_username
+ - Set the Public key from the realm, can be found in Realm setting Keys Tab and in RSA Type, click "Public Key" 
  
