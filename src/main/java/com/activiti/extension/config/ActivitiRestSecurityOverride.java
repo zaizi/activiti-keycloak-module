@@ -47,6 +47,10 @@ public class ActivitiRestSecurityOverride  implements AlfrescoApiSecurityOverrid
     @Bean
     public PublicKey decodePublicKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
 
+    	if(!keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
+    		return null;
+		}
+
         X509EncodedKeySpec spec = new X509EncodedKeySpec(pemToDer(this.environment.getProperty("keycloak.client.public.key")));
 
         KeyFactory kf = KeyFactory.getInstance("RSA");

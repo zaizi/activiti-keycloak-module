@@ -48,6 +48,22 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     	jwtTokenUtil.setDecodePublicKey(publicKey);
 	}
 
+    public void setUserDetailsService(UserDetailsService userDetailsService) {
+
+        this.userDetailsService = userDetailsService;
+    }
+
+    public void setJwtTokenUtil(JwtTokenUtil jwtTokenUtil) {
+
+        this.jwtTokenUtil = jwtTokenUtil;
+    }
+
+    @Override
+    public void setEnvironment(Environment environment) {
+
+        this.environment = environment;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
 

@@ -28,7 +28,12 @@ public class JwtTokenUtil implements Serializable {
         this.decodePublicKey = decodePublicKey;
     }
 
-    /**
+	public void setEnvironment(Environment environment) {
+
+		this.environment = environment;
+	}
+
+	/**
      * Get the User Name from Token after Sign with the Publick Key
      * @param token : JWT Token
      * @return {@code String} : User name as String
@@ -37,8 +42,8 @@ public class JwtTokenUtil implements Serializable {
 
 		final Claims claims = getAllClaimsFromToken(token);
 
-		if (claims.containsKey(this.environment.getProperty("keycloak.client.user.name.key"))) {
-			return (String) claims.get(this.environment.getProperty("keycloak.client.user.name.key"));
+		if (claims.containsKey(environment.getProperty("keycloak.client.user.name.key"))) {
+			return (String) claims.get(environment.getProperty("keycloak.client.user.name.key"));
 		}
 		return null;
     }
@@ -49,7 +54,7 @@ public class JwtTokenUtil implements Serializable {
      * @param token : JWT Token
      * @return {@code io.jsonwebtoken.Claims}
      */
-    private Claims getAllClaimsFromToken(String token)   {
+    public Claims getAllClaimsFromToken(String token)   {
 
              return Jwts.parser()
                     .setSigningKey(decodePublicKey)
