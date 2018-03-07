@@ -1,6 +1,6 @@
 package com.activiti.extension.config;
 
-import com.activiti.api.security.AlfrescoApiSecurityOverride;
+import com.activiti.api.security.AlfrescoApiSecurityExtender;
 import com.activiti.extension.bean.JwtAuthenticationEntryPoint;
 import com.activiti.extension.bean.JwtAuthenticationTokenFilter;
 import com.activiti.extension.bean.KeyCloakEnabled;
@@ -10,8 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.security.KeyFactory;
@@ -22,8 +20,8 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 @Configuration
-@Order
-public class ActivitiRestSecurityOverride  implements AlfrescoApiSecurityOverride {
+@Order(1)
+public class ActivitiRestSecurityOverride  implements AlfrescoApiSecurityExtender {
 
     @Autowired
     private JwtAuthenticationEntryPoint unauthorizedHandler;
@@ -95,23 +93,8 @@ public class ActivitiRestSecurityOverride  implements AlfrescoApiSecurityOverrid
        if(keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
 
            jwtAuthenticationTokenFilter.setPublicKey(decodePublicKey());
-		   ((HttpSecurity) ((ExpressionUrlAuthorizationConfigurer.AuthorizedUrl) ((HttpSecurity) ((HttpSecurity)
-				   httpSecurity
-				   .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-				   .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and())
-				   .csrf().disable()).antMatcher(this.environment.getProperty("keycloak.api.uri.pattern"))
-				   .authorizeRequests().antMatchers(new String[]{this.environment.getProperty("keycloak.api.uri.pattern")}))
-				   .authenticated().and())
-				   .addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
-	   } else {
 
-		   ((HttpSecurity)((ExpressionUrlAuthorizationConfigurer.AuthorizedUrl)((HttpSecurity)((HttpSecurity)
-				   httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and())
-				   .csrf().disable()).antMatcher("/api/**").authorizeRequests().antMatchers(new String[]{"/api/**"}))
-				   .authenticated().and()).httpBasic();
-
+			httpSecurity.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
 	   }
-
-
     }
 }
