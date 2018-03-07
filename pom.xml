@@ -34,6 +34,8 @@
         <maven.compiler.target>1.7</maven.compiler.target>
         <resteasy.version>3.0.9.Final</resteasy.version>
         <keycloak.version>3.4.3.Final</keycloak.version>
+        <jjwt.version>0.9.0</jjwt.version>
+
 
     </properties>
 
@@ -52,6 +54,22 @@
                 </exclusion>
             </exclusions>
           </dependency>
+        <!-- https://mvnrepository.com/artifact/org.activiti/activiti-engine -->
+        <dependency>
+            <groupId>${activiti.groupId}</groupId>
+            <artifactId>activiti-app-rest</artifactId>
+            <version>${activiti.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.activiti/activiti-app-conf -->
+        <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-app-conf</artifactId>
+            <version>6.0.0</version>
+        </dependency>
+
+
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -95,6 +113,19 @@
             <artifactId>junit</artifactId>
             <version>4.12</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+            <scope>provided</scope>
         </dependency>
 
     </dependencies>
