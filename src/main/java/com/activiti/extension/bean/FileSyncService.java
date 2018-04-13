@@ -6,9 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class FileSyncService extends AbstractExternalIdmSourceSyncService {
@@ -34,7 +32,7 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 
 	@Override
 	protected boolean isDifferentialSyncEnabled(Long aLong) {
-		return true;
+		return false;
 	}
 
 	@Override
@@ -45,11 +43,24 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 			return new ExternalIdmQueryResultImpl(Collections.emptyList(), Collections.emptyList());
 		}
 
-		keyCloakUserGropuDetails.setRealmName(environment.getProperty("keycloak.client.realm"));
+		List<ExternalIdmUserImpl> lstOfUsers = new ArrayList<>();
 
-		List<ExternalIdmUserImpl> lstOfUsers = keyCloakUserGropuDetails.getUsers();
+		List<ExternalIdmGroupImpl> lstOfGroups = new ArrayList<>();
 
-		return new ExternalIdmQueryResultImpl(lstOfUsers, keyCloakUserGropuDetails.getGroups(lstOfUsers));
+		String[] allRealms = environment.getProperty("keycloak.sync.realms").split(",");
+		for (String realm : allRealms) {
+
+			keyCloakUserGropuDetails.setRealmName(realm);
+
+			List<ExternalIdmUserImpl> lstOfRealmUsers = keyCloakUserGropuDetails.getUsers();
+
+			List<ExternalIdmGroupImpl> lstOfRealmGroups = keyCloakUserGropuDetails.getGroups(lstOfRealmUsers);
+
+			lstOfUsers.addAll(lstOfRealmUsers);
+			lstOfGroups.addAll(lstOfRealmGroups);
+		}
+
+		return new ExternalIdmQueryResultImpl(lstOfUsers, lstOfGroups);
 
 	}
 
@@ -92,7 +103,7 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 			return null;
 		}
 
-		return environment.getProperty("keycloak.synchronization.differential.cronExpression");
+		return "";
 	}
 
 	@Override

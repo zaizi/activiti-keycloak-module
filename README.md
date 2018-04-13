@@ -23,17 +23,29 @@ To run use `mvn clean install alfresco:run` or `./run.sh` and verify that it
 
 Key properties to set (Property File can be find in resources folder as activities-keycloak.properties)
 
+###  Synchronization  
+Synchronization process is used to synchronize users and groups from keycloak to acitivi
+   
 | Property Key | Expected Value |
 | ------ | ------ |
-| keycloak.auth-server-url | URL to Keycloak Server Ex : http://localhost:8180/auth |
-| keycloak.realm | Realm of the User to get the KeyCloak Client.(Mostly it is master Realm) |
+| keycloak.auth-server-url.to.sync | URL to Keycloak Server Ex : http://localhost:8180/auth, used to synch all users |
+| keycloak.realm.to.sync | Realm of the login User to get the KeyCloak Client.(Mostly it is master Realm) |
+| keycloak.sync.realms | Comma separated realm's from which users and groups need to synchronize |
 | keycloak.userName | User who is authorised and authenticated to access the release and Clients |
 | keycloak.password | Password for the user |
-| keycloak.clientId | Clients defined in the Key cloak
+| keycloak.clientId | Clients defined in the Key cloak |
 | keycloak.client.secret | Secret Key Generation, on selecting the Access type to Confidential, you get Credentials Tab, where you can find Secret Key |
 | keycloak.synchronization.full.cronExpression | Cron Pattern to run the process on scheduled time(Full Load) Ex : */2 * * * * * |
-| keycloak.synchronization.differential.cronExpression | Cron Pattern to run the process on scheduled time(Differentials Load) Ex :0 0 */4 * * ? |
-| keycloak.client.realm | Realm to Load the Users and groups from |
+| keycloak.synchronization.enabled | Flag which is used to enable the synchronization |
+
+###  Activiti Process Admin Login using Activiti Login Page
+ Administrator have to login  
+   
+| Property Key | Expected Value |
+| ------ | ------ | 
+| keycloak.auth-server-url.to.login.in.realm | URL to Keycloak Server Ex : http://localhost:8180/auth, used to login in the realm |
+| keycloak.realm.to.login | Realm to Login the Users and groups from |
+
 | security.authentication.use-externalid | To Enable Authentication by external ID. In case of KeyCloak is Synchronised , Keycloak Username becomes external ID on Synchronisation |
 | security.authentication.casesensitive | to Enable External ID Case Sensitivity |
 | keycloak.api.authentication.header | Key for the token that is sent to the Rest API
@@ -57,7 +69,7 @@ This command creates "admin" user with the password as "admin"
  - Set the Access Type of the Client to "Confidential" and set the Valid Redirect URL(Example : http://localhost:8080/activiti-app) and click Save
  - You should be able to see "Credentials" Tab for Client, click that , choose "Client ID and Secret" in Client Authenticator if not selected by default. 
  - Then copy the Secret Key or regenerate and copy. And Update in the properties file in Project as described above(keycloak.client.secret). 
- - Create a Realm you want to work on and copy the realm name and add it to Property file in the application for "Client Realm" (Property Key :  keycloak.client.realm)
+ - Create a Realm you want to work on and copy the realm name and add it to Property file in the application for "Client Realm" (Property Key :  keycloak.realm.to.sync)
  - Create Users and Groups in the created "Realm". Please note "First Name" and "Last Name" are must for Activiti.
  - To Enable Authenticate after the synchronisation, set the property true for "security.authentication.use-externalid"
  
