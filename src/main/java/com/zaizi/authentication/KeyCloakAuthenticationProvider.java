@@ -39,7 +39,7 @@ public class KeyCloakAuthenticationProvider extends AbstractUserDetailsAuthentic
 	public void additionalAuthenticationChecks(UserDetails userDetails,
 			UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken) throws AuthenticationException {
 
-		if (!keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
+		if (!keyCloakEnabled.isKeyCloakRealmLoginEnabled()) {
 
 			customizeDaoAuthenticationProvider.additionalAuthenticationChecks(userDetails,
 					usernamePasswordAuthenticationToken);
@@ -48,14 +48,14 @@ public class KeyCloakAuthenticationProvider extends AbstractUserDetailsAuthentic
 
 		try {
 
-			Keycloak keycloak = getKeyCloakBuilder().serverUrl(environment.getProperty("keycloak.auth-server-url"))
-					.realm(environment.getProperty("keycloak.client.realm"))
+			Keycloak keycloak = getKeyCloakBuilder().serverUrl(environment.getProperty("keycloak.auth-server-url.to.login.in.realm"))
+					.realm(environment.getProperty("keycloak.realm.to.login"))
 					.username(usernamePasswordAuthenticationToken.getName())
 					.password(usernamePasswordAuthenticationToken.getCredentials().toString())
-					.clientId(environment.getProperty("keycloak.client.clientId")).grantType(OAuth2Constants.PASSWORD)
-					.clientSecret(environment.getProperty("keycloak.client.client.secret")).build();
+					.clientId(environment.getProperty("keycloak.realm.clientId")).grantType(OAuth2Constants.PASSWORD)
+					.clientSecret(environment.getProperty("keycloak.realm.client.secret")).build();
 
-			keycloak.realm(environment.getProperty("keycloak.client.realm")).toRepresentation();
+			keycloak.realm(environment.getProperty("keycloak.realm.to.login")).toRepresentation();
 		} catch (Exception exception) {
 			LOGGER.error("Authentication Failed", exception);
 			throw new BadCredentialsException("Authentication failed  ", exception);

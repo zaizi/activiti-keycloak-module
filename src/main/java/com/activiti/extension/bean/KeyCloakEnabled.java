@@ -20,4 +20,25 @@ public class KeyCloakEnabled {
 		return Boolean.valueOf(environment.getProperty("keycloak.synchronization.enabled", "false"));
 	}
 
+
+	/**
+	 * Method is used to enable the synchronization of data from Key Cloak.
+	 *
+	 * @return {@code Boolean}
+	 */
+	public Boolean isKeyCloakRealmLoginEnabled() {
+
+		return Boolean.valueOf(environment.getProperty("keycloak.realm.login.enabled", "false"));
+	}
+
+
+	/**
+	 * Method is used to enable the synchronization of data from Key Cloak.
+	 *
+	 * @return {@code Boolean}
+	 */
+	public Boolean isKeyCloakJWTLoginEnabled() {
+
+		return Boolean.valueOf(environment.getProperty("keycloak.jwt.login.enabled", "false"));
+	}
 }

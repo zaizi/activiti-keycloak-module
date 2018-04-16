@@ -121,7 +121,7 @@ public class KeyCloakAuthenticationProviderTest {
 
 		UserDetails stubUserDetails = new User("test", "test", Collections.singletonList(grantedAuthority));
 
-		when(keyCloakEnabled.isKeyCloakSynchronizeEnabled()).thenReturn(true);
+		when(keyCloakEnabled.isKeyCloakRealmLoginEnabled()).thenReturn(true);
 
 		when(keyCloakAuthenticationProvider.getKeyCloakBuilder()).thenReturn(builder);
 
@@ -159,7 +159,7 @@ public class KeyCloakAuthenticationProviderTest {
 
 		UserDetails stubUserDetails = new User("test", "test", Collections.singletonList(grantedAuthority));
 
-		when(keyCloakEnabled.isKeyCloakSynchronizeEnabled()).thenReturn(true);
+		when(keyCloakEnabled.isKeyCloakRealmLoginEnabled()).thenReturn(true);
 
 		when(keyCloakAuthenticationProvider.getKeyCloakBuilder()).thenReturn(builder);
 

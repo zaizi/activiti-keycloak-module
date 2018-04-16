@@ -32,8 +32,9 @@ public class KeyCloakConfiguration extends AbstractProcessEngineConfigurator {
 			return null;
 		}
 
-		return KeycloakBuilder.builder().serverUrl(environment.getProperty("keycloak.auth-server-url"))
-				.realm(environment.getProperty("keycloak.realm")).username(environment.getProperty("keycloak.userName"))
+		return KeycloakBuilder.builder().serverUrl(environment.getProperty("keycloak.auth-server-url.to.sync"))
+				.realm(environment.getProperty("keycloak.realm.to.sync"))
+				.username(environment.getProperty("keycloak.userName"))
 				.password(environment.getProperty("keycloak.password"))
 				.clientId(environment.getProperty("keycloak.clientId")).grantType(OAuth2Constants.PASSWORD)
 				.clientSecret(environment.getProperty("keycloak.client.secret")).build();

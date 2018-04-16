@@ -45,7 +45,7 @@ public class ActivitiRestSecurityOverride  implements AlfrescoApiSecurityExtende
     @Bean
     public PublicKey decodePublicKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
 
-    	if(!keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
+    	if(!keyCloakEnabled.isKeyCloakJWTLoginEnabled()) {
     		return null;
 		}
 
@@ -90,7 +90,7 @@ public class ActivitiRestSecurityOverride  implements AlfrescoApiSecurityExtende
 	@Override
     public void configure(HttpSecurity httpSecurity) throws Exception {
 
-       if(keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
+       if(keyCloakEnabled.isKeyCloakJWTLoginEnabled()) {
 
            jwtAuthenticationTokenFilter.setPublicKey(decodePublicKey());
 
