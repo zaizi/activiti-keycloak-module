@@ -27,7 +27,7 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 
 	@Override
 	protected boolean isFullSyncEnabled(Long aLong) {
-		return true;
+		return this.keyCloakEnabled.isKeyCloakSynchronizeEnabled();
 	}
 
 	@Override

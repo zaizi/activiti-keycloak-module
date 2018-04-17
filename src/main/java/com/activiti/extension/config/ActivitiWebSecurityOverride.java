@@ -34,12 +34,14 @@ public class ActivitiWebSecurityOverride implements AlfrescoWebAppSecurityExtend
 	@Override
 	public void configure(HttpSecurity httpSecurity) throws Exception {
 
+		jwtAuthenticationTokenFilter.setPublicKey(decodePublicKey);
+
+		httpSecurity.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
+
 		if(keyCloakEnabled.isKeyCloakRealmLoginEnabled()) {
 
 
-			jwtAuthenticationTokenFilter.setPublicKey(decodePublicKey);
 
-			httpSecurity.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
 
 			CustomAuthenticationConfig<HttpSecurity> loginConfig = new CustomAuthenticationConfig();
