@@ -34,7 +34,7 @@ public class ActivitiWebSecurityOverride implements AlfrescoWebAppSecurityExtend
 	@Override
 	public void configure(HttpSecurity httpSecurity) throws Exception {
 
-		if(keyCloakEnabled.isKeyCloakSynchronizeEnabled()) {
+		if(keyCloakEnabled.isKeyCloakRealmLoginEnabled()) {
 
 
 			jwtAuthenticationTokenFilter.setPublicKey(decodePublicKey);
