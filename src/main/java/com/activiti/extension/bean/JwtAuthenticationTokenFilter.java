@@ -101,6 +101,9 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
 
+        } else {
+
+            logger.debug("couldn't find bearer string, will ignore the header");
         }
 
 
