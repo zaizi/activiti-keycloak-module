@@ -103,7 +103,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
         } else {
 
-            logger.warn("couldn't find bearer string, will ignore the header");
+            logger.debug("couldn't find bearer string, will ignore the header");
         }
 
 
