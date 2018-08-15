@@ -2,9 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.zaizi</groupId>
+    <groupId>uk.gov.homeoffice.cba</groupId>
     <artifactId>activiti-keycloak-module</artifactId>
-    <version>2.2.0-SNAPSHOT</version>
+    <version>2.1.1</version>
     <name>activiti-keycloak-module Activiti Jar Module - SDK 3</name>
     <description>Activiti JAR Module that produces a JAR file with Java extensions such as service task delegates. It also produces an application ZIP with workflow definition, forms etc that can be deployed via /activiti-app - SDK 3</description>
     <packaging>jar</packaging>
@@ -46,6 +46,7 @@
             <groupId>${activiti.groupId}</groupId>
             <artifactId>activiti-app-logic</artifactId>
             <version>${activiti.version}</version>
+            <scope>provided</scope>
             <exclusions>
                 <!-- Exclude the SLF4J JAR so we don't get multiple binding warnings when running -->
                 <exclusion>
@@ -53,58 +54,75 @@
                     <artifactId>slf4j-log4j12</artifactId>
                 </exclusion>
             </exclusions>
-          </dependency>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/org.activiti/activiti-engine -->
         <dependency>
             <groupId>${activiti.groupId}</groupId>
             <artifactId>activiti-app-rest</artifactId>
             <version>${activiti.version}</version>
             <scope>provided</scope>
+            <exclusions>
+                <!-- Exclude the SLF4J JAR so we don't get multiple binding warnings when running -->
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
-
         <!-- https://mvnrepository.com/artifact/org.activiti/activiti-app-conf -->
         <dependency>
             <groupId>org.activiti</groupId>
             <artifactId>activiti-app-conf</artifactId>
             <version>6.0.0</version>
+            <scope>provided</scope>
+            <exclusions>
+                <!-- Exclude the SLF4J JAR so we don't get multiple binding warnings when running -->
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
-
-
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot</artifactId>
             <version>1.5.10.RELEASE</version>
+            <scope>provided</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.springframework/spring-context -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
             <version>5.0.3.RELEASE</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.10.19</version>
-            <scope>test</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-admin-client</artifactId>
             <version>${keycloak.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-client</artifactId>
             <version>${resteasy.version}</version>
         </dependency>
-
         <dependency>
         	<groupId>org.jboss.resteasy</groupId>
         	<artifactId>resteasy-jackson2-provider</artifactId>
         	<version>${resteasy.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Testing -->
@@ -115,19 +133,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
-            <version>${jjwt.version}</version>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.10.19</version>
+            <scope>test</scope>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-            <scope>provided</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -307,61 +317,17 @@
         </testResources>
     </build>
 
-    <!--
-        Alfresco Maven Repositories
-        -->
-    <repositories>
-        <!-- Alfresco ECM -->
-        <repository>
-            <id>alfresco-public</id>
-            <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
-        </repository>
-        <repository>
-            <id>alfresco-public-snapshots</id>
-            <url>https://artifacts.alfresco.com/nexus/content/groups/public-snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-            </snapshots>
-        </repository>
-        <!-- Alfresco Enterprise Edition Artifacts, put username/pwd for server in settings.xml -->
-        <repository>
-            <id>alfresco-private-repository</id>
-            <url>https://artifacts.alfresco.com/nexus/content/groups/private</url>
-        </repository>
-
-        <!-- Activiti BPM -->
-        <repository>
-            <id>activiti-public</id>
-            <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
-        </repository>
-        <repository>
-            <id>activiti-public-snapshots</id>
-            <url>https://artifacts.alfresco.com/nexus/content/groups/public-snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-            </snapshots>
-        </repository>
-        <!-- Activiti Enterprise Edition Artifacts, put username/pwd for server in settings.xml -->
-        <repository>
-            <id>activiti-private-repository</id>
-            <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-enterprise-releases</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>alfresco-plugin-public</id>
-            <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>alfresco-plugin-public-snapshots</id>
-            <url>https://artifacts.alfresco.com/nexus/content/groups/public-snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
+    <distributionManagement>
+	    <repository>
+	       <id>artifactory</id>
+	       <name>libs-release-local</name>
+	       <url>https://artifactory.digital.homeoffice.gov.uk/artifactory/libs-release-local</url>
+	    </repository>
+        <snapshotRepository>
+           <id>artifactory</id>
+           <name>libs-snapshot-local</name>
+           <url>https://artifactory.digital.homeoffice.gov.uk/artifactory/libs-snapshot-local</url>
+       	</snapshotRepository>
+    </distributionManagement>
 
 </project>
