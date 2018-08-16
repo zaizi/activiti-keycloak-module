@@ -3,6 +3,7 @@ package com.activiti.extension.bean;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,10 @@ public class JwtTokenUtil implements Serializable {
 
     @Autowired
     private Environment environment;
+    
+    @Value ("${keycloak.jwt.clockskew.seconds}")
+	private long allowedClockSkew;
+    
 
     private PublicKey decodePublicKey;
 
@@ -57,6 +62,7 @@ public class JwtTokenUtil implements Serializable {
     public Claims getAllClaimsFromToken(String token)   {
 
              return Jwts.parser()
+            		.setAllowedClockSkewSeconds(allowedClockSkew)
                     .setSigningKey(decodePublicKey)
                     .parseClaimsJws(token)
                     .getBody();
