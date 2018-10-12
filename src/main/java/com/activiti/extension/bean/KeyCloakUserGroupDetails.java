@@ -2,6 +2,7 @@ package com.activiti.extension.bean;
 
 import com.activiti.domain.sync.ExternalIdmGroupImpl;
 import com.activiti.domain.sync.ExternalIdmUserImpl;
+
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.GroupResource;
 import org.keycloak.admin.client.resource.GroupsResource;
@@ -10,6 +11,8 @@ import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
@@ -21,6 +24,8 @@ import java.util.stream.Collectors;
 @Component
 @ComponentScan("com.activiti.extension.config")
 public class KeyCloakUserGroupDetails {
+	
+	private final Logger log = LoggerFactory.getLogger(KeyCloakUserGroupDetails.class);
 
 	@Autowired
 	private Keycloak keyCloakClient;
@@ -35,24 +40,32 @@ public class KeyCloakUserGroupDetails {
 
 		RealmResource realmsResource = keyCloakClient.realm(this.realmName);
 		GroupsResource groupsResource = realmsResource.groups();
+		
 
 		List<ExternalIdmGroupImpl> lstOfGroups = Collections.emptyList();
+		
+		
+
 		List<GroupRepresentation> lstOfGroupRepresentation = groupsResource.groups();
+		
 		if (lstOfGroupRepresentation != null && !lstOfGroupRepresentation.isEmpty()) {
 			lstOfGroups = lstOfGroupRepresentation.stream().map(gr -> {
 
 				ExternalIdmGroupImpl externalIdmGroup = new ExternalIdmGroupImpl();
 				externalIdmGroup.setOriginalSrcId(gr.getName());
 				externalIdmGroup.setName(gr.getName());
+					
+				externalIdmGroup.setChildGroups(getSubgroups(gr.getName()));
+									
 				GroupResource groupResource = groupsResource.group(gr.getId());
 				List<UserRepresentation> members = groupResource.members();
 				if (members != null && !members.isEmpty()) {
 
 					Map<String, ExternalIdmUserImpl> usersMap = users.stream()
 							.collect(Collectors.toMap(ExternalIdmUserImpl::getId, Function.identity()));
-
-					externalIdmGroup
-							.setUsers(members.stream().filter(member -> usersMap.containsKey(member.getUsername()))
+									
+					externalIdmGroup.
+							setUsers(members.stream().filter(member -> usersMap.containsKey(member.getUsername()))
 									.map(member -> usersMap.get(member.getUsername())).collect(Collectors.toList()));
 
 				}
@@ -63,6 +76,35 @@ public class KeyCloakUserGroupDetails {
 		}
 
 		return lstOfGroups;
+	}
+	
+	private List<ExternalIdmGroupImpl> getSubgroups(String parentGroupName) {
+
+		RealmResource realmsResource = keyCloakClient.realm(this.realmName);
+		GroupsResource groupsResource = realmsResource.groups();
+		List<ExternalIdmGroupImpl> lstOfGroups = new ArrayList<>();
+		List<GroupRepresentation> lstOfGroupRepresentation = groupsResource.groups();
+
+		GroupRepresentation parent = lstOfGroupRepresentation.stream()
+				.filter(pr -> pr.getName().equalsIgnoreCase(parentGroupName)).findFirst().get();
+
+		if (parent.getSubGroups() != null || !parent.getSubGroups().isEmpty()){
+			List<GroupRepresentation> subgroups = parent.getSubGroups();
+			
+			subgroups.forEach(sg -> {
+				ExternalIdmGroupImpl externalSubIdmGroup = new ExternalIdmGroupImpl();
+				externalSubIdmGroup.setOriginalSrcId(sg.getName());
+				externalSubIdmGroup.setName(sg.getName());
+				lstOfGroups.add(externalSubIdmGroup);
+			});
+			
+		}
+		else{
+			return null;
+		}	
+		
+		return lstOfGroups;
+		
 	}
 
 	public List<ExternalIdmUserImpl> getUsers() {
