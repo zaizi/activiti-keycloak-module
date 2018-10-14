@@ -41,11 +41,8 @@ public class KeyCloakUserGroupDetails {
 		RealmResource realmsResource = keyCloakClient.realm(this.realmName);
 		GroupsResource groupsResource = realmsResource.groups();
 		
-
 		List<ExternalIdmGroupImpl> lstOfGroups = Collections.emptyList();
 		
-		
-
 		List<GroupRepresentation> lstOfGroupRepresentation = groupsResource.groups();
 		
 		if (lstOfGroupRepresentation != null && !lstOfGroupRepresentation.isEmpty()) {
@@ -55,7 +52,7 @@ public class KeyCloakUserGroupDetails {
 				externalIdmGroup.setOriginalSrcId(gr.getName());
 				externalIdmGroup.setName(gr.getName());
 					
-				externalIdmGroup.setChildGroups(getSubgroups(gr.getName()));
+				externalIdmGroup.setChildGroups(getSubgroups(lstOfGroupRepresentation, gr.getName()));
 									
 				GroupResource groupResource = groupsResource.group(gr.getId());
 				List<UserRepresentation> members = groupResource.members();
@@ -78,35 +75,56 @@ public class KeyCloakUserGroupDetails {
 		return lstOfGroups;
 	}
 	
-	private List<ExternalIdmGroupImpl> getSubgroups(String parentGroupName) {
+	private List<ExternalIdmGroupImpl> getSubgroups(List<GroupRepresentation> lstOfGroupRepresentation, String parentGroupName) {
 
-		RealmResource realmsResource = keyCloakClient.realm(this.realmName);
-		GroupsResource groupsResource = realmsResource.groups();
-		List<ExternalIdmGroupImpl> lstOfGroups = new ArrayList<>();
-		List<GroupRepresentation> lstOfGroupRepresentation = groupsResource.groups();
+		Optional<GroupRepresentation> parentGroupRep = lstOfGroupRepresentation.stream()
+				.filter(t -> t.getName().equalsIgnoreCase(parentGroupName)).findFirst();
 
-		GroupRepresentation parent = lstOfGroupRepresentation.stream()
-				.filter(pr -> pr.getName().equalsIgnoreCase(parentGroupName)).findFirst().get();
 
-		if (parent.getSubGroups() != null || !parent.getSubGroups().isEmpty()){
-			List<GroupRepresentation> subgroups = parent.getSubGroups();
+		if (parentGroupRep.isPresent()){
 			
-			subgroups.forEach(sg -> {
-				ExternalIdmGroupImpl externalSubIdmGroup = new ExternalIdmGroupImpl();
-				externalSubIdmGroup.setOriginalSrcId(sg.getName());
-				externalSubIdmGroup.setName(sg.getName());
-				lstOfGroups.add(externalSubIdmGroup);
-			});
+			List<ExternalIdmGroupImpl> lstOfExternalIdmGroupImpl = new ArrayList<>();
+			List<GroupRepresentation> lstOfGroups = new ArrayList<>();
+						
+			if(parentGroupRep.get().getSubGroups() != null){
+				parentGroupRep.get().getSubGroups().stream().forEach(r -> {
+					lstOfGroups.add(r);
+				});
+			}
+						
+			lstOfExternalIdmGroupImpl=lstOfGroups.stream()  
+		            .map(this::toExternalIdmGroupImpl) // initial call
+		            .collect(Collectors.toList());
+			
+			return lstOfExternalIdmGroupImpl;
 			
 		}
-		else{
-			return null;
-		}	
-		
-		return lstOfGroups;
+					
+		return null;
 		
 	}
-
+	
+	
+	public ExternalIdmGroupImpl toExternalIdmGroupImpl(GroupRepresentation grep) {
+		ExternalIdmGroupImpl result = new ExternalIdmGroupImpl();
+	    result.setName(grep.getName());
+	    result.setOriginalSrcId(grep.getName());
+	    List<ExternalIdmGroupImpl> subExternalIdmGroupImpl = new ArrayList<>();
+	    List<GroupRepresentation> subGroupRepresentation = new ArrayList<>();
+	    if(grep.getSubGroups() != null){
+	    	grep.getSubGroups().stream().forEach(r -> {
+	    		subGroupRepresentation.add(r);
+			});
+		}
+	   
+	    subExternalIdmGroupImpl =	subGroupRepresentation.stream()
+	        .map(this::toExternalIdmGroupImpl) // recursive call to this method
+	        .collect(Collectors.toList());
+	    result.setChildGroups(subExternalIdmGroupImpl);
+	    	   
+	    return result;
+	}
+	
 	public List<ExternalIdmUserImpl> getUsers() {
 
 		RealmResource realmsResource = keyCloakClient.realm(this.realmName);
@@ -144,4 +162,5 @@ public class KeyCloakUserGroupDetails {
 	public void setRealmName(String realmName) {
 		this.realmName = realmName;
 	}
+	
 }
