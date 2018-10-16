@@ -11,8 +11,6 @@ import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
@@ -20,13 +18,12 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 @ComponentScan("com.activiti.extension.config")
 public class KeyCloakUserGroupDetails {
 	
-	private final Logger log = LoggerFactory.getLogger(KeyCloakUserGroupDetails.class);
-
 	@Autowired
 	private Keycloak keyCloakClient;
 
@@ -42,7 +39,7 @@ public class KeyCloakUserGroupDetails {
 		GroupsResource groupsResource = realmsResource.groups();
 		
 		List<ExternalIdmGroupImpl> lstOfGroups = Collections.emptyList();
-		
+			
 		List<GroupRepresentation> lstOfGroupRepresentation = groupsResource.groups();
 		
 		if (lstOfGroupRepresentation != null && !lstOfGroupRepresentation.isEmpty()) {
@@ -51,11 +48,19 @@ public class KeyCloakUserGroupDetails {
 				ExternalIdmGroupImpl externalIdmGroup = new ExternalIdmGroupImpl();
 				externalIdmGroup.setOriginalSrcId(gr.getName());
 				externalIdmGroup.setName(gr.getName());
-					
-				externalIdmGroup.setChildGroups(getSubgroups(lstOfGroupRepresentation, gr.getName()));
-									
+								
+				//setting child groups
+				List<ExternalIdmGroupImpl> lstOfSubGroups = new ArrayList<>();
+				
+				lstOfSubGroups=gr.getSubGroups().stream()  
+			            .map(this::toExternalIdmGroupImpl) // initial call
+			            .collect(Collectors.toList());
+				externalIdmGroup.setChildGroups(lstOfSubGroups);
+																
 				GroupResource groupResource = groupsResource.group(gr.getId());
+								
 				List<UserRepresentation> members = groupResource.members();
+				
 				if (members != null && !members.isEmpty()) {
 
 					Map<String, ExternalIdmUserImpl> usersMap = users.stream()
@@ -75,54 +80,25 @@ public class KeyCloakUserGroupDetails {
 		return lstOfGroups;
 	}
 	
-	private List<ExternalIdmGroupImpl> getSubgroups(List<GroupRepresentation> lstOfGroupRepresentation, String parentGroupName) {
-
-		Optional<GroupRepresentation> parentGroupRep = lstOfGroupRepresentation.stream()
-				.filter(t -> t.getName().equalsIgnoreCase(parentGroupName)).findFirst();
-
-
-		if (parentGroupRep.isPresent()){
-			
-			List<ExternalIdmGroupImpl> lstOfExternalIdmGroupImpl = new ArrayList<>();
-			List<GroupRepresentation> lstOfGroups = new ArrayList<>();
-						
-			if(parentGroupRep.get().getSubGroups() != null){
-				parentGroupRep.get().getSubGroups().stream().forEach(r -> {
-					lstOfGroups.add(r);
-				});
-			}
-						
-			lstOfExternalIdmGroupImpl=lstOfGroups.stream()  
-		            .map(this::toExternalIdmGroupImpl) // initial call
-		            .collect(Collectors.toList());
-			
-			return lstOfExternalIdmGroupImpl;
-			
-		}
-					
-		return null;
+	public ExternalIdmGroupImpl toExternalIdmGroupImpl(GroupRepresentation groupRep) {
 		
-	}
-	
-	
-	public ExternalIdmGroupImpl toExternalIdmGroupImpl(GroupRepresentation grep) {
-		ExternalIdmGroupImpl result = new ExternalIdmGroupImpl();
-	    result.setName(grep.getName());
-	    result.setOriginalSrcId(grep.getName());
-	    List<ExternalIdmGroupImpl> subExternalIdmGroupImpl = new ArrayList<>();
+		ExternalIdmGroupImpl externalIdmGroupImpl = new ExternalIdmGroupImpl();
+	    externalIdmGroupImpl.setName(groupRep.getName());
+	    externalIdmGroupImpl.setOriginalSrcId(groupRep.getName());
+	    List<ExternalIdmGroupImpl> subExternalIdmGroupImpl;
 	    List<GroupRepresentation> subGroupRepresentation = new ArrayList<>();
-	    if(grep.getSubGroups() != null){
-	    	grep.getSubGroups().stream().forEach(r -> {
+	    if(groupRep.getSubGroups() != null){
+	    	groupRep.getSubGroups().stream().forEach(r -> {
 	    		subGroupRepresentation.add(r);
 			});
 		}
 	   
 	    subExternalIdmGroupImpl =	subGroupRepresentation.stream()
-	        .map(this::toExternalIdmGroupImpl) // recursive call to this method
+	        .map(this::toExternalIdmGroupImpl) 
 	        .collect(Collectors.toList());
-	    result.setChildGroups(subExternalIdmGroupImpl);
+	    externalIdmGroupImpl.setChildGroups(subExternalIdmGroupImpl);
 	    	   
-	    return result;
+	    return externalIdmGroupImpl;
 	}
 	
 	public List<ExternalIdmUserImpl> getUsers() {
