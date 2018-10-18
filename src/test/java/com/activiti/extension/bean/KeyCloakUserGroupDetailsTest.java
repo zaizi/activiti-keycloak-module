@@ -82,10 +82,11 @@ public class KeyCloakUserGroupDetailsTest {
 	 *            - Group Name
 	 */
 
-	private void addGroupRepresentation(List<GroupRepresentation> lstOfGroups, String name) {
+	private void addGroupRepresentation(List<GroupRepresentation> lstOfGroups, String name, List<GroupRepresentation> lstOfSubGroups) {
 
 		GroupRepresentation groupRepresentation = new GroupRepresentation();
 		groupRepresentation.setName(name);
+		groupRepresentation.setSubGroups(lstOfSubGroups);
 		lstOfGroups.add(groupRepresentation);
 	}
 
@@ -185,8 +186,8 @@ public class KeyCloakUserGroupDetailsTest {
 		addExternalUserIdm(lstOfUsers, "tempUser");
 
 		List<GroupRepresentation> lstOfGroups = new ArrayList<>();
-		addGroupRepresentation(lstOfGroups, "SuperUser");
-		addGroupRepresentation(lstOfGroups, "tempUser");
+		addGroupRepresentation(lstOfGroups, "SuperUser", null);
+		addGroupRepresentation(lstOfGroups, "tempUser", null);
 
 		when(realmsResource.groups()).thenReturn(groupsResource);
 
@@ -214,8 +215,8 @@ public class KeyCloakUserGroupDetailsTest {
 		addExternalUserIdm(lstOfUsers, "tempUser");
 
 		List<GroupRepresentation> lstOfGroups = new ArrayList<>();
-		addGroupRepresentation(lstOfGroups, "SuperUser");
-		addGroupRepresentation(lstOfGroups, "tempUser");
+		addGroupRepresentation(lstOfGroups, "SuperUser", null);
+		addGroupRepresentation(lstOfGroups, "tempUser", null);
 
 		when(realmsResource.groups()).thenReturn(groupsResource);
 
@@ -247,8 +248,8 @@ public class KeyCloakUserGroupDetailsTest {
 		addUserRepresentation(lstOfUsersRepresentation, "tempUser", true);
 
 		List<GroupRepresentation> lstOfGroups = new ArrayList<>();
-		addGroupRepresentation(lstOfGroups, "SuperUser");
-		addGroupRepresentation(lstOfGroups, "tempUser");
+		addGroupRepresentation(lstOfGroups, "SuperUser", null);
+		addGroupRepresentation(lstOfGroups, "tempUser", null);
 
 		when(realmsResource.groups()).thenReturn(groupsResource);
 
@@ -283,8 +284,8 @@ public class KeyCloakUserGroupDetailsTest {
 		addUserRepresentation(lstOfUsersRepresentation, "tempUser", false);
 
 		List<GroupRepresentation> lstOfGroups = new ArrayList<>();
-		addGroupRepresentation(lstOfGroups, "SuperUser");
-		addGroupRepresentation(lstOfGroups, "tempUser");
+		addGroupRepresentation(lstOfGroups, "SuperUser", null);
+		addGroupRepresentation(lstOfGroups, "tempUser", null);
 
 		when(realmsResource.groups()).thenReturn(groupsResource);
 
@@ -343,6 +344,38 @@ public class KeyCloakUserGroupDetailsTest {
 		List<ExternalIdmGroupImpl> results = keyCloakUserGroupDetails.getGroups(lstOfUsers);
 
 		assertTrue(results.isEmpty());
+
+	}
+		
+	/**
+	 * Test get Groups from KeyCloak which has subgroups
+	 *
+	 * {@link KeyCloakUserGroupDetails#getGroups(java.util.List)}
+	 */
+	@Test
+	public void getKeycloakSubgroups() {
+
+		List<ExternalIdmUserImpl> lstOfUsers = new ArrayList<>();
+		addExternalUserIdm(lstOfUsers, "SuperUser");
+		addExternalUserIdm(lstOfUsers, "tempUser");
+
+		List<GroupRepresentation> lstOfSubGroups = new ArrayList<>();
+		addGroupRepresentation(lstOfSubGroups, "testUser", null);
+		
+		List<GroupRepresentation> lstOfGroups = new ArrayList<>();
+		addGroupRepresentation(lstOfGroups, "SuperUser", null);
+		addGroupRepresentation(lstOfGroups, "tempUser", lstOfSubGroups);
+		
+		when(realmsResource.groups()).thenReturn(groupsResource);
+
+		when(groupsResource.groups()).thenReturn(lstOfGroups);
+
+		when(groupsResource.group(Mockito.anyString())).thenReturn(groupResource);
+		when(groupResource.members()).thenReturn(Collections.emptyList());
+
+		List<ExternalIdmGroupImpl> results = keyCloakUserGroupDetails.getGroups(lstOfUsers);
+
+		assertEquals(1, results.get(1).getChildGroups().size());
 
 	}
 
