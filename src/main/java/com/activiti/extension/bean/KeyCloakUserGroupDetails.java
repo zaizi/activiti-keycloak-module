@@ -2,8 +2,8 @@ package com.activiti.extension.bean;
 
 import com.activiti.domain.sync.ExternalIdmGroupImpl;
 import com.activiti.domain.sync.ExternalIdmUserImpl;
+
 import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.resource.GroupResource;
 import org.keycloak.admin.client.resource.GroupsResource;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UsersResource;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Component
 @ComponentScan("com.activiti.extension.config")
 public class KeyCloakUserGroupDetails {
-
+	
 	@Autowired
 	private Keycloak keyCloakClient;
 
@@ -30,41 +30,63 @@ public class KeyCloakUserGroupDetails {
 	public KeyCloakUserGroupDetails() {
 
 	}
-
+	
 	public List<ExternalIdmGroupImpl> getGroups(List<ExternalIdmUserImpl> users) {
 
 		RealmResource realmsResource = keyCloakClient.realm(this.realmName);
 		GroupsResource groupsResource = realmsResource.groups();
-
+		
 		List<ExternalIdmGroupImpl> lstOfGroups = Collections.emptyList();
+			
 		List<GroupRepresentation> lstOfGroupRepresentation = groupsResource.groups();
+		
 		if (lstOfGroupRepresentation != null && !lstOfGroupRepresentation.isEmpty()) {
-			lstOfGroups = lstOfGroupRepresentation.stream().map(gr -> {
-
-				ExternalIdmGroupImpl externalIdmGroup = new ExternalIdmGroupImpl();
-				externalIdmGroup.setOriginalSrcId(gr.getName());
-				externalIdmGroup.setName(gr.getName());
-				GroupResource groupResource = groupsResource.group(gr.getId());
-				List<UserRepresentation> members = groupResource.members();
-				if (members != null && !members.isEmpty()) {
-
-					Map<String, ExternalIdmUserImpl> usersMap = users.stream()
-							.collect(Collectors.toMap(ExternalIdmUserImpl::getId, Function.identity()));
-
-					externalIdmGroup
-							.setUsers(members.stream().filter(member -> usersMap.containsKey(member.getUsername()))
-									.map(member -> usersMap.get(member.getUsername())).collect(Collectors.toList()));
-
-				}
-
-				return externalIdmGroup;
-			}).collect(Collectors.toList());
-
+			lstOfGroups = lstOfGroupRepresentation.stream().map(gr -> toExternalIdmGroupImpl(gr, users, groupsResource)) //initial call of recursion
+					.collect(Collectors.toList());
 		}
 
 		return lstOfGroups;
 	}
-
+		
+	public ExternalIdmGroupImpl toExternalIdmGroupImpl(GroupRepresentation groupRep, List<ExternalIdmUserImpl> users, GroupsResource groupsResource) {
+		
+		ExternalIdmGroupImpl externalIdmGroupImpl = new ExternalIdmGroupImpl();
+	    externalIdmGroupImpl.setName(groupRep.getName());
+	    externalIdmGroupImpl.setOriginalSrcId(groupRep.getName());
+	    List<ExternalIdmGroupImpl> subExternalIdmGroupImpl;
+	    
+	    List<GroupRepresentation> subGroupRepresentation = new ArrayList<>();
+	    
+	    List<UserRepresentation> members = groupsResource.group(groupRep.getId()).members(); 		
+		
+	    //set users for each group
+		List<ExternalIdmUserImpl> newUsers = new ArrayList<>();
+		if (members != null && !members.isEmpty()) {
+			
+			Map<String, ExternalIdmUserImpl> usersMap = users.stream()
+					.collect(Collectors.toMap(ExternalIdmUserImpl::getId, Function.identity()));
+			
+			newUsers = members.stream().filter(member -> usersMap.containsKey(member.getUsername()))
+	    			.map(member -> usersMap.get(member.getUsername())).collect(Collectors.toList());
+		}
+		
+		externalIdmGroupImpl.setUsers(newUsers);
+	    		
+	    if(groupRep.getSubGroups() != null){
+	    	groupRep.getSubGroups().stream().forEach(gr -> {
+	    		subGroupRepresentation.add(gr);
+	    		
+			});
+		}
+	   
+	    subExternalIdmGroupImpl =	subGroupRepresentation.stream()
+	        .map(r -> toExternalIdmGroupImpl(r, users, groupsResource)) 
+	        .collect(Collectors.toList());
+	    externalIdmGroupImpl.setChildGroups(subExternalIdmGroupImpl);
+	    
+	    return externalIdmGroupImpl;
+	}
+		
 	public List<ExternalIdmUserImpl> getUsers() {
 
 		RealmResource realmsResource = keyCloakClient.realm(this.realmName);
@@ -102,4 +124,5 @@ public class KeyCloakUserGroupDetails {
 	public void setRealmName(String realmName) {
 		this.realmName = realmName;
 	}
+	
 }
