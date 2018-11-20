@@ -31,7 +31,7 @@ public class KeyCloakUserGroupDetails {
 
 	}
 	
-	public List<ExternalIdmGroupImpl> getGroups(List<ExternalIdmUserImpl> users) {
+	public synchronized List<ExternalIdmGroupImpl> getGroups(List<ExternalIdmUserImpl> users) {
 
 		RealmResource realmsResource = keyCloakClient.realm(this.realmName);
 		GroupsResource groupsResource = realmsResource.groups();
@@ -41,19 +41,19 @@ public class KeyCloakUserGroupDetails {
 		List<GroupRepresentation> lstOfGroupRepresentation = groupsResource.groups();
 		
 		if (lstOfGroupRepresentation != null && !lstOfGroupRepresentation.isEmpty()) {
-			lstOfGroups = lstOfGroupRepresentation.stream().map(gr -> toExternalIdmGroupImpl(gr, users, groupsResource)) //initial call of recursion
+			lstOfGroups = lstOfGroupRepresentation.stream().map(gr -> getSubgroups(gr, users, groupsResource)) //initial call of recursion
 					.collect(Collectors.toList());
 		}
 
 		return lstOfGroups;
 	}
 		
-	public ExternalIdmGroupImpl toExternalIdmGroupImpl(GroupRepresentation groupRep, List<ExternalIdmUserImpl> users, GroupsResource groupsResource) {
+	public synchronized ExternalIdmGroupImpl getSubgroups(GroupRepresentation groupRep, List<ExternalIdmUserImpl> users, GroupsResource groupsResource) {
 		
 		ExternalIdmGroupImpl externalIdmGroupImpl = new ExternalIdmGroupImpl();
 	    externalIdmGroupImpl.setName(groupRep.getName());
 	    externalIdmGroupImpl.setOriginalSrcId(groupRep.getName());
-	    List<ExternalIdmGroupImpl> subExternalIdmGroupImpl;
+	    List<ExternalIdmGroupImpl> subExternalIdmGroupImpl = Collections.emptyList();
 	    
 	    List<GroupRepresentation> subGroupRepresentation = new ArrayList<>();
 	    
@@ -73,21 +73,22 @@ public class KeyCloakUserGroupDetails {
 		externalIdmGroupImpl.setUsers(newUsers);
 	    		
 	    if(groupRep.getSubGroups() != null){
-	    	groupRep.getSubGroups().stream().forEach(gr -> {
+	    	groupRep.getSubGroups().stream().distinct().forEach(gr -> {
 	    		subGroupRepresentation.add(gr);
 	    		
 			});
 		}
 	   
 	    subExternalIdmGroupImpl =	subGroupRepresentation.stream()
-	        .map(r -> toExternalIdmGroupImpl(r, users, groupsResource)) 
+	        .map(r -> getSubgroups(r, users, groupsResource)) 
 	        .collect(Collectors.toList());
+	    subExternalIdmGroupImpl=filterDuplicates(subExternalIdmGroupImpl);
 	    externalIdmGroupImpl.setChildGroups(subExternalIdmGroupImpl);
 	    
 	    return externalIdmGroupImpl;
 	}
 		
-	public List<ExternalIdmUserImpl> getUsers() {
+	public synchronized List<ExternalIdmUserImpl> getUsers() {
 
 		RealmResource realmsResource = keyCloakClient.realm(this.realmName);
 		UsersResource ur = realmsResource.users();
@@ -123,6 +124,13 @@ public class KeyCloakUserGroupDetails {
 
 	public void setRealmName(String realmName) {
 		this.realmName = realmName;
+	}
+	private List<ExternalIdmGroupImpl> filterDuplicates(Collection<ExternalIdmGroupImpl> collection) {
+		TreeSet<ExternalIdmGroupImpl> uniqueSet = collection.stream().collect(Collectors.toCollection(
+				() -> new TreeSet<ExternalIdmGroupImpl>((p1, p2) -> ((com.activiti.domain.sync.ExternalIdmGroupImpl) p1)
+						.getName().compareTo(((com.activiti.domain.sync.ExternalIdmGroupImpl) p2).getName()))));
+		List<ExternalIdmGroupImpl> lstOfGroups = new ArrayList<ExternalIdmGroupImpl>(uniqueSet);
+		return lstOfGroups;
 	}
 	
 }
