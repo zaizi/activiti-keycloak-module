@@ -87,7 +87,6 @@ public class KeyCloakUserGroupDetails {
 	        .map(r -> getSubgroups(r, users, groupsResource)) 
 	        .collect(Collectors.toList());
 	    subExternalIdmGroupImpl=filterDuplicates(subExternalIdmGroupImpl);
-	    logger.info("subgroup name here "+subExternalIdmGroupImpl.get(0));
 	    subExternalIdmGroupImpl.stream().forEach(element -> System.out.println(element.getName()));
 	    externalIdmGroupImpl.setChildGroups(subExternalIdmGroupImpl);
 	    
