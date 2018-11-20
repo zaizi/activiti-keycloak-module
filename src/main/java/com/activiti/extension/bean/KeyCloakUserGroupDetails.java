@@ -3,6 +3,8 @@ package com.activiti.extension.bean;
 import com.activiti.domain.sync.ExternalIdmGroupImpl;
 import com.activiti.domain.sync.ExternalIdmUserImpl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.GroupsResource;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -24,6 +26,8 @@ public class KeyCloakUserGroupDetails {
 	
 	@Autowired
 	private Keycloak keyCloakClient;
+	
+	private final Log logger = LogFactory.getLog(this.getClass());
 
 	private String realmName;
 
@@ -83,6 +87,8 @@ public class KeyCloakUserGroupDetails {
 	        .map(r -> getSubgroups(r, users, groupsResource)) 
 	        .collect(Collectors.toList());
 	    subExternalIdmGroupImpl=filterDuplicates(subExternalIdmGroupImpl);
+	    logger.info("subgroup name here "+subExternalIdmGroupImpl.get(0));
+	    subExternalIdmGroupImpl.stream().forEach(element -> System.out.println(element.getName()));
 	    externalIdmGroupImpl.setChildGroups(subExternalIdmGroupImpl);
 	    
 	    return externalIdmGroupImpl;
