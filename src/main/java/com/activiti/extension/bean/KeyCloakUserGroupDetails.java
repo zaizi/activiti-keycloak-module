@@ -82,6 +82,7 @@ public class KeyCloakUserGroupDetails {
 	    subExternalIdmGroupImpl =	subGroupRepresentation.stream()
 	        .map(r -> getSubgroups(r, users, groupsResource)) 
 	        .collect(Collectors.toList());
+	    subExternalIdmGroupImpl=filterDuplicates(subExternalIdmGroupImpl);
 	    externalIdmGroupImpl.setChildGroups(subExternalIdmGroupImpl);
 	    
 	    return externalIdmGroupImpl;
@@ -123,6 +124,13 @@ public class KeyCloakUserGroupDetails {
 
 	public void setRealmName(String realmName) {
 		this.realmName = realmName;
+	}
+	private List<ExternalIdmGroupImpl> filterDuplicates(Collection<ExternalIdmGroupImpl> collection) {
+		TreeSet<ExternalIdmGroupImpl> uniqueSet = collection.stream().collect(Collectors.toCollection(
+				() -> new TreeSet<ExternalIdmGroupImpl>((p1, p2) -> ((com.activiti.domain.sync.ExternalIdmGroupImpl) p1)
+						.getName().compareTo(((com.activiti.domain.sync.ExternalIdmGroupImpl) p2).getName()))));
+		List<ExternalIdmGroupImpl> lstOfGroups = new ArrayList<ExternalIdmGroupImpl>(uniqueSet);
+		return lstOfGroups;
 	}
 	
 }
