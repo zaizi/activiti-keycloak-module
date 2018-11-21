@@ -27,12 +27,12 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 
 	@Override
 	protected boolean isFullSyncEnabled(Long aLong) {
-		return this.keyCloakEnabled.isKeyCloakSynchronizeEnabled();
+		return false;
 	}
 
 	@Override
 	protected boolean isDifferentialSyncEnabled(Long aLong) {
-		return false;
+		return this.keyCloakEnabled.isKeyCloakSynchronizeEnabled();
 	}
 
 	@Override
@@ -66,12 +66,16 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 
 	@Override
 	protected List<? extends ExternalIdmUser> getUsersModifiedSince(Date date, Long aLong) {
-		return null;
+		List<ExternalIdmUserImpl> lstOfRealmUsers = keyCloakUserGropuDetails.getUsers();
+		
+		return lstOfRealmUsers;
 	}
 
 	@Override
 	protected List<? extends ExternalIdmGroup> getGroupsModifiedSince(Date date, Long aLong) {
-		return null;
+		List<ExternalIdmUserImpl> lstOfRealmUsers = keyCloakUserGropuDetails.getUsers();
+		List<ExternalIdmGroupImpl> lstOfRealmGroups = keyCloakUserGropuDetails.getGroups(lstOfRealmUsers);
+		return lstOfRealmGroups;
 	}
 
 	@Override
@@ -92,7 +96,7 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 			return null;
 		}
 
-		return environment.getProperty("keycloak.synchronization.full.cronExpression");
+		return "";
 	}
 
 	@Override
@@ -103,7 +107,8 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 			return null;
 		}
 
-		return "";
+	
+		return environment.getProperty("keycloak.synchronization.full.cronExpression");
 	}
 
 	@Override
