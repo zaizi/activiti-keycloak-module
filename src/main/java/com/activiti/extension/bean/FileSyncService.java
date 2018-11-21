@@ -66,15 +66,34 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 
 	@Override
 	protected List<? extends ExternalIdmUser> getUsersModifiedSince(Date date, Long aLong) {
-		List<ExternalIdmUserImpl> lstOfRealmUsers = keyCloakUserGropuDetails.getUsers();
+		String[] allRealms = environment.getProperty("keycloak.sync.realms").split(",");
+		List<ExternalIdmUserImpl> lstOfRealmUsers=null;
+		
+		for (String realm : allRealms) {
+
+			keyCloakUserGropuDetails.setRealmName(realm);
+            lstOfRealmUsers = keyCloakUserGropuDetails.getUsers();
+		
+		}
 		
 		return lstOfRealmUsers;
 	}
 
 	@Override
 	protected List<? extends ExternalIdmGroup> getGroupsModifiedSince(Date date, Long aLong) {
-		List<ExternalIdmUserImpl> lstOfRealmUsers = keyCloakUserGropuDetails.getUsers();
-		List<ExternalIdmGroupImpl> lstOfRealmGroups = keyCloakUserGropuDetails.getGroups(lstOfRealmUsers);
+		String[] allRealms = environment.getProperty("keycloak.sync.realms").split(",");
+		List<ExternalIdmUserImpl> lstOfRealmUsers=null;
+		List<ExternalIdmGroupImpl> lstOfRealmGroups=null;
+		for (String realm : allRealms) {
+
+			keyCloakUserGropuDetails.setRealmName(realm);
+
+			lstOfRealmUsers = keyCloakUserGropuDetails.getUsers();
+
+		    lstOfRealmGroups = keyCloakUserGropuDetails.getGroups(lstOfRealmUsers);
+
+
+		}
 		return lstOfRealmGroups;
 	}
 
