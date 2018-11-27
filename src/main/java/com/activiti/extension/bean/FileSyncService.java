@@ -2,6 +2,9 @@ package com.activiti.extension.bean;
 
 import com.activiti.api.idm.AbstractExternalIdmSourceSyncService;
 import com.activiti.domain.sync.*;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -10,6 +13,8 @@ import java.util.*;
 
 @Component
 public class FileSyncService extends AbstractExternalIdmSourceSyncService {
+	
+	 private final Log logger = LogFactory.getLog(this.getClass());
 
 	@Autowired
 	private KeyCloakUserGroupDetails keyCloakUserGropuDetails;
@@ -27,12 +32,12 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 
 	@Override
 	protected boolean isFullSyncEnabled(Long aLong) {
-		return false;
+		return this.keyCloakEnabled.isKeyCloakSynchronizeEnabled();
 	}
 
 	@Override
 	protected boolean isDifferentialSyncEnabled(Long aLong) {
-		return this.keyCloakEnabled.isKeyCloakSynchronizeEnabled();
+		return false;
 	}
 
 	@Override
@@ -58,7 +63,11 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 
 			lstOfUsers.addAll(lstOfRealmUsers);
 			lstOfGroups.addAll(lstOfRealmGroups);
+			
 		}
+		for(ExternalIdmGroupImpl groupImpl:lstOfGroups)
+			logger.info("Group  Name "+ groupImpl.getName());
+			
 
 		return new ExternalIdmQueryResultImpl(lstOfUsers, lstOfGroups);
 
@@ -66,35 +75,12 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 
 	@Override
 	protected List<? extends ExternalIdmUser> getUsersModifiedSince(Date date, Long aLong) {
-		String[] allRealms = environment.getProperty("keycloak.sync.realms").split(",");
-		List<ExternalIdmUserImpl> lstOfRealmUsers=null;
-		
-		for (String realm : allRealms) {
-
-			keyCloakUserGropuDetails.setRealmName(realm);
-            lstOfRealmUsers = keyCloakUserGropuDetails.getUsers();
-		
-		}
-		
-		return lstOfRealmUsers;
+		return null;
 	}
 
 	@Override
 	protected List<? extends ExternalIdmGroup> getGroupsModifiedSince(Date date, Long aLong) {
-		String[] allRealms = environment.getProperty("keycloak.sync.realms").split(",");
-		List<ExternalIdmUserImpl> lstOfRealmUsers=null;
-		List<ExternalIdmGroupImpl> lstOfRealmGroups=null;
-		for (String realm : allRealms) {
-
-			keyCloakUserGropuDetails.setRealmName(realm);
-
-			lstOfRealmUsers = keyCloakUserGropuDetails.getUsers();
-
-		    lstOfRealmGroups = keyCloakUserGropuDetails.getGroups(lstOfRealmUsers);
-
-
-		}
-		return lstOfRealmGroups;
+		return null;
 	}
 
 	@Override
@@ -115,7 +101,7 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 			return null;
 		}
 
-		return "";
+		return environment.getProperty("keycloak.synchronization.full.cronExpression");
 	}
 
 	@Override
@@ -126,8 +112,7 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 			return null;
 		}
 
-	
-		return environment.getProperty("keycloak.synchronization.full.cronExpression");
+		return "";
 	}
 
 	@Override
