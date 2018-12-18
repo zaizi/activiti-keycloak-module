@@ -66,7 +66,7 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 			
 		}
 		for(ExternalIdmGroupImpl groupImpl:lstOfGroups)
-			logger.info("Group  Name "+ groupImpl.getName());
+			logger.info("Group  Name "+ groupImpl.getName()+"subgroup: ");
 			
 
 		return new ExternalIdmQueryResultImpl(lstOfUsers, lstOfGroups);
