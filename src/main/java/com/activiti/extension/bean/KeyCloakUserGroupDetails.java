@@ -92,7 +92,7 @@ public class KeyCloakUserGroupDetails {
 
 		RealmResource realmsResource = keyCloakClient.realm(this.realmName);
 		UsersResource ur = realmsResource.users();
-		System.out.println("UsersResource name :: "+ur);
+		System.out.println("UsersResource list :: "+realmsResource.users().list());
 		List<org.keycloak.representations.idm.UserRepresentation> userRepresentations = ur.list();
 
 		List<ExternalIdmUserImpl> users = Collections.emptyList();
