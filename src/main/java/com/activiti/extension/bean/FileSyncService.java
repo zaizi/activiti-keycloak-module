@@ -51,11 +51,12 @@ public class FileSyncService extends AbstractExternalIdmSourceSyncService {
 		for (String realm : allRealms) {
 
 			keyCloakUserGropuDetails.setRealmName(realm);
-
+            System.out.println("Realm name :: "+realm);
 			List<ExternalIdmUserImpl> lstOfRealmUsers = keyCloakUserGropuDetails.getUsers();
 
 			List<ExternalIdmGroupImpl> lstOfRealmGroups = keyCloakUserGropuDetails.getGroups(lstOfRealmUsers);
-
+			System.out.println("lstOfRealmUsers ::"+lstOfRealmUsers);
+			System.out.println("lstOfRealmGroups ::"+lstOfRealmGroups);
 			lstOfUsers.addAll(lstOfRealmUsers);
 			lstOfGroups.addAll(lstOfRealmGroups);
 		}
