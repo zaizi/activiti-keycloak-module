@@ -31,6 +31,7 @@ public class KeyCloakUserGroupDetails {
 
 	}
 	
+	
 	public List<ExternalIdmGroupImpl> getGroups(List<ExternalIdmUserImpl> users) {
 
 		RealmResource realmsResource = keyCloakClient.realm(this.realmName);
@@ -91,8 +92,8 @@ public class KeyCloakUserGroupDetails {
 
 		RealmResource realmsResource = keyCloakClient.realm(this.realmName);
 		UsersResource ur = realmsResource.users();
-
-		List<org.keycloak.representations.idm.UserRepresentation> userRepresentations = ur.list();
+		
+		List<org.keycloak.representations.idm.UserRepresentation> userRepresentations = ur.list(null, realmsResource.users().count());
 
 		List<ExternalIdmUserImpl> users = Collections.emptyList();
 
