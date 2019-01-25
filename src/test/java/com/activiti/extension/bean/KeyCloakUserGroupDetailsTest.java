@@ -15,7 +15,6 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
@@ -126,7 +125,7 @@ public class KeyCloakUserGroupDetailsTest {
 
 		when(realmsResource.users()).thenReturn(usersResource);
 
-		when(usersResource.list()).thenReturn(lstOfUsers);
+		when(usersResource.list(Mockito.anyInt(), Mockito.anyInt())).thenReturn(lstOfUsers);
 
 		List<ExternalIdmUserImpl> users = keyCloakUserGroupDetails.getUsers();
 
